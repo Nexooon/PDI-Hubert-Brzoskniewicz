@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "functions": "cloud-functions-demo-ca158",
+    "default": "cloud-functions-demo-ca158"
+  },
+  "targets": {},
+  "etags": {}
+}

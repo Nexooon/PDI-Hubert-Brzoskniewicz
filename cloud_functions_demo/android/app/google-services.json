@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "317931464094",
+    "project_id": "cloud-functions-demo-ca158",
+    "storage_bucket": "cloud-functions-demo-ca158.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317931464094:android:b3addf82983fe31a24628f",
+        "android_client_info": {
+          "package_name": "com.example.cloudfunctionsdemo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjzuwZZwquotJbjfKAwu0TpnMdhrf5Sas"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
