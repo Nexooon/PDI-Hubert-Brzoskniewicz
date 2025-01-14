@@ -11,12 +11,17 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   String? errorMessage = '';
-  bool isLogin = true;
 
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
 
   Future<void> signInWithEmailAndPassword() async {
+    if (_controllerEmail.text.isEmpty || _controllerPassword.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Wprowadź email i hasło';
+      });
+      return;
+    }
     try {
       await Auth().signInWithEmailAndPassword(
         email: _controllerEmail.text,
@@ -29,55 +34,19 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> createUserWithEmailAndPassword() async {
-    try {
-      await Auth().createUserWithEmailAndPassword(
-        email: _controllerEmail.text,
-        password: _controllerPassword.text,
-      );
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-      });
-    }
-  }
-
   Widget _title() {
-    return const Text('Firebase Auth');
-  }
-
-  Widget _entryField(
-    String title,
-    TextEditingController controller,
-  ) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: title,
-      ),
-    );
+    return const Text('System obsługi dydaktyki');
   }
 
   Widget _errorMessage() {
-    return Text(errorMessage == '' ? '' : 'Humm ? $errorMessage');
+    return Text(errorMessage == '' ? '' : 'Coś poszło nie tak: $errorMessage',
+        style: const TextStyle(color: Colors.red));
   }
 
   Widget _submitButton() {
     return ElevatedButton(
-      onPressed:
-          isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
-      child: Text(isLogin ? 'Login' : 'Register'),
-    );
-  }
-
-  Widget _loginOrRegisterButton() {
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          isLogin = !isLogin;
-        });
-      },
-      child: Text(isLogin ? 'Register instead' : 'Login instead'),
+      onPressed: signInWithEmailAndPassword,
+      child: Text('Login'),
     );
   }
 
@@ -95,11 +64,17 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            _entryField('email', _controllerEmail),
-            _entryField('password', _controllerPassword),
+            TextField(
+              controller: _controllerEmail,
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: _controllerPassword,
+              decoration: InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
             _errorMessage(),
             _submitButton(),
-            _loginOrRegisterButton(),
           ],
         ),
       ),

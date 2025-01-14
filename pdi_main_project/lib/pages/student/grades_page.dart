@@ -3,54 +3,48 @@ import 'package:flutter/material.dart';
 import 'package:pdi_main_project/service/database.dart';
 
 class GradesPage extends StatefulWidget {
-  final DocumentSnapshot currentUser;
-  const GradesPage({super.key, required this.currentUser});
+  final String currentUserUid;
+  const GradesPage({super.key, required this.currentUserUid});
 
   @override
   State<GradesPage> createState() => _GradesPageState();
 }
 
 class _GradesPageState extends State<GradesPage> {
-//   Future<QuerySnapshot<Map<String, dynamic>>> getStudentGrades() async {
-//     return await DatabaseMethods().getStudentGrades();
-//   }
+  late Future<QuerySnapshot<Map<String, dynamic>>> _gradesFuture;
 
-  // Przykładowe dane dotyczące lat szkolnych, przedmiotów i ocen
-  final Map<String, List<Map<String, dynamic>>> schoolYears = {
-    '2023/2024': [
-      {
-        'subject': 'Matematyka',
-        'partialGrades': ['5', '4+', '3', '3-', '2+', '5', '4'],
-        'finalGrade': '4+',
-      },
-      {
-        'subject': 'Język Polski',
-        'partialGrades': ['4', '5', '4'],
-        'finalGrade': '4',
-      },
-    ],
-    '2022/2023': [
-      {
-        'subject': 'Fizyka',
-        'partialGrades': ['3+', '4', '4-'],
-        'finalGrade': '4',
-      },
-      {
-        'subject': 'Historia',
-        'partialGrades': ['5', '4', '5'],
-        'finalGrade': '5',
-      },
-    ],
-  };
+  @override
+  void initState() {
+    super.initState();
+    _gradesFuture = DatabaseMethods().getStudentGrades(widget.currentUserUid);
+  }
 
-  // Funkcja wyświetlająca szczegóły oceny po kliknięciu
-  void _showGradeDetails(BuildContext context, String grade) {
+  String convertDateTime(DateTime dateTime) {
+    var date = dateTime;
+    String minute = date.minute.toString();
+    if (date.minute < 10) {
+      minute = '0${date.minute}';
+    }
+    return '${date.day}.${date.month}.${date.year} ${date.hour}:$minute';
+  }
+
+  void _showGradeDetails(
+      BuildContext context, String grade, String description, DateTime date) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Szczegóły oceny'),
-          content: Text('Ocena: $grade\nWięcej informacji o tej ocenie...'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Ocena: $grade'),
+              SizedBox(height: 10),
+              Text('Opis: $description'),
+              SizedBox(height: 10),
+              Text('Data: ${convertDateTime(date.toLocal())}'),
+            ],
+          ),
           actions: <Widget>[
             TextButton(
               child: Text('Zamknij'),
@@ -64,112 +58,216 @@ class _GradesPageState extends State<GradesPage> {
     );
   }
 
+  // Przekształcenie danych z Firestore do struktury używanej w UI
+  Map<String, List<Map<String, dynamic>>> _organizeGrades(
+      QuerySnapshot<Map<String, dynamic>> snapshot) {
+    Map<String, List<Map<String, dynamic>>> organized = {};
+
+    for (var doc in snapshot.docs) {
+      var data = doc.data();
+      String schoolYear = data['school_year'] ?? 'Nieznany rok';
+      String subject = data['subject_name'];
+      String gradeValue = data['grade_value'] ?? 'Brak oceny';
+      String description = data['description'] ?? '';
+      Timestamp timestamp = data['date'] ?? Timestamp.now();
+      bool isFinal = data['is_final'] ?? false;
+
+      if (!organized.containsKey(schoolYear)) {
+        organized[schoolYear] = [];
+      }
+
+      // Znajdź przedmiot w zorganizowanych danych lub dodaj nowy
+      var subjectList = organized[schoolYear]!;
+      var subjectEntry = subjectList.firstWhere(
+        (entry) => entry['subject'] == subject,
+        orElse: () => {
+          'subject': subject,
+          'partialGrades': [],
+          'finalGrade': null,
+        },
+      );
+
+      if (!subjectList.contains(subjectEntry)) {
+        subjectList.add(subjectEntry);
+      }
+
+      if (isFinal) {
+        subjectEntry['finalGrade'] = {
+          'grade': gradeValue,
+          'description': description,
+          'date': timestamp.toDate(),
+        };
+      } else {
+        subjectEntry['partialGrades'].add({
+          'grade': gradeValue,
+          'description': description,
+          'date': timestamp.toDate(),
+        });
+      }
+    }
+
+    organized.forEach((year, subjects) {
+      for (var subject in subjects) {
+        if (subject['finalGrade'] == null) {
+          subject['finalGrade'] = {
+            'grade': "-",
+            'description': 'Nie wystawiono',
+            'date': Timestamp.now().toDate(),
+          };
+        }
+      }
+    });
+
+    return organized;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Oceny Ucznia'),
-        backgroundColor: Colors.blue,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: schoolYears.keys.map((year) {
-            return ExpansionTile(
-              title: Text(
-                year,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              initiallyExpanded: year == schoolYears.keys.first,
-              children: schoolYears[year]!.map((subjectData) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          subjectData['subject'],
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Wrap(
-                          spacing: 5.0,
-                          runSpacing: 5.0,
+    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      future: _gradesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Oceny Ucznia'),
+              backgroundColor: Colors.blue,
+            ),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Oceny Ucznia'),
+              backgroundColor: Colors.blue,
+            ),
+            body: Center(child: Text('Wystąpił błąd podczas ładowania ocen.')),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Oceny Ucznia'),
+              backgroundColor: Colors.blue,
+            ),
+            body: Center(child: Text('Brak ocen do wyświetlenia.')),
+          );
+        }
+
+        Map<String, List<Map<String, dynamic>>> schoolYears =
+            _organizeGrades(snapshot.data!);
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Oceny Ucznia'),
+            backgroundColor: Colors.blue,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: schoolYears.keys.map((year) {
+                return ExpansionTile(
+                  title: Text(
+                    year,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  initiallyExpanded: year == schoolYears.keys.first,
+                  children: schoolYears[year]!.map((subjectData) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 9.0),
-                              child: Text(
-                                'Oceny cząstkowe: ',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            ...subjectData['partialGrades']
-                                .map<Widget>((grade) {
-                              return GestureDetector(
-                                onTap: () => _showGradeDetails(context, grade),
-                                child: Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 5),
-                                  padding: EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue[100],
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    grade,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          'Ocena końcowa: ',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => _showGradeDetails(
-                            context,
-                            subjectData['finalGrade'],
-                          ),
-                          child: Container(
-                            margin: EdgeInsets.symmetric(vertical: 5),
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.green[200],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              subjectData['finalGrade'],
+                            Text(
+                              subjectData['subject'],
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Oceny cząstkowe:',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 5),
+                            Wrap(
+                              spacing: 5.0,
+                              runSpacing: 5.0,
+                              children: subjectData['partialGrades']
+                                  .map<Widget>((gradeData) {
+                                return GestureDetector(
+                                  onTap: () => _showGradeDetails(
+                                    context,
+                                    gradeData['grade'],
+                                    gradeData['description'],
+                                    gradeData['date'],
+                                  ),
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 5),
+                                    padding: EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue[100],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      gradeData['grade'],
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Ocena końcowa:',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => _showGradeDetails(
+                                context,
+                                subjectData['finalGrade']['grade'],
+                                subjectData['finalGrade']['description'],
+                                subjectData['finalGrade']['date'],
+                              ),
+                              child: Container(
+                                margin: EdgeInsets.symmetric(vertical: 5),
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.green[200],
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  subjectData['finalGrade']['grade'],
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  }).toList(),
                 );
               }).toList(),
-            );
-          }).toList(),
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

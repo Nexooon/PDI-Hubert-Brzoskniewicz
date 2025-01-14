@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:pdi_main_project/pages/admin/home_page_admin.dart';
-import 'package:pdi_main_project/pages/student/home_page_student.dart';
 import 'package:pdi_main_project/widget_tree.dart';
 import 'firebase_options.dart';
 
@@ -25,7 +23,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.orange,
       ),
       home: const WidgetTree(),
-      // home: HomePageAdmin(),
     );
   }
 }

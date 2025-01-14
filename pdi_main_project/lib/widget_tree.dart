@@ -1,10 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pdi_main_project/pages/parent/home_page_parent.dart';
+import 'package:pdi_main_project/pages/super_admin/home_page_super_admin.dart';
+import 'package:pdi_main_project/pages/teacher/home_page_teacher.dart';
 import 'package:pdi_main_project/service/auth.dart';
-import 'package:pdi_main_project/pages/admin/home_page_admin.dart';
-import 'package:pdi_main_project/pages/login_register_page.dart';
-import 'package:pdi_main_project/service/database.dart';
+import 'package:pdi_main_project/pages/school_admin/home_page_school_admin.dart';
+import 'package:pdi_main_project/pages/login_page.dart';
 import 'package:pdi_main_project/pages/student/home_page_student.dart';
+import 'package:pdi_main_project/service/database.dart';
 
 class WidgetTree extends StatefulWidget {
   const WidgetTree({super.key});
@@ -14,17 +17,36 @@ class WidgetTree extends StatefulWidget {
 }
 
 class _WidgetTreeState extends State<WidgetTree> {
-  DocumentSnapshot? currentUser;
-
   Future<Widget> getHomePage() async {
-    currentUser = await DatabaseMethods().getUserDetails();
+    final User? currentUser = Auth().currentUser;
+    // final DatabaseMethods databaseMethods = DatabaseMethods();
 
     if (currentUser != null) {
-      String role = currentUser!['role'];
-      if (role == 'admin') {
-        return const HomePageAdmin();
-      } else if (role == 'student') {
-        return HomePageStudent(currentUser: currentUser!);
+      String currentUserUid = currentUser.uid;
+
+      IdTokenResult token = await currentUser.getIdTokenResult();
+
+      DatabaseMethods databaseMethods = DatabaseMethods();
+      print(currentUser.email);
+
+      if (token.claims?['superAdmin'] == true) {
+        return HomePageSuperAdmin();
+      } else if (token.claims?['schoolAdmin'] == true) {
+        return HomePageSchoolAdmin();
+      } else if (token.claims?['student'] == true) {
+        return HomePageStudent(
+          currentUserUid: currentUserUid,
+        );
+      } else if (token.claims?['teacher'] == true) {
+        String schoolId = await databaseMethods.getSchoolId();
+        return HomePageTeacher(
+          currentUserUid: currentUserUid,
+          schoolId: schoolId,
+        );
+      } else if (token.claims?['parent'] == true) {
+        return HomePageParent(
+          currentUserUid: currentUserUid,
+        );
       }
     }
     return const LoginPage();
