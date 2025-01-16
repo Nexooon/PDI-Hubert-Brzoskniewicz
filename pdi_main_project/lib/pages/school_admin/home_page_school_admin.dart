@@ -122,6 +122,7 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
       _passwordController.clear();
       setState(() {
         selectedRole = null;
+        selectedParent = null;
         errorMessage = '';
         isLoading = false;
       });
