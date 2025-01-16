@@ -21,9 +21,11 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
 
   String? selectedRole;
   String? selectedClass;
+  String? selectedParent;
   final _formKey = GlobalKey<FormState>();
   String? schoolId;
   Map<String, dynamic>? classesData;
+  Map<String, dynamic>? parentsData;
 
   @override
   void initState() {
@@ -36,6 +38,7 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
       schoolId = await DatabaseMethods().getSchoolId();
       if (schoolId != null) {
         await _loadClassIds();
+        await _loadParentIds();
       }
     } catch (e) {
       setState(() {
@@ -50,6 +53,16 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
     } catch (e) {
       setState(() {
         errorMessage = 'Nie udało się pobrać klas: $e';
+      });
+    }
+  }
+
+  Future<void> _loadParentIds() async {
+    try {
+      parentsData = await DatabaseMethods().getParentsFromSchoolId(schoolId!);
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Nie udało się pobrać rodziców: $e';
       });
     }
   }
@@ -100,6 +113,7 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
         'role': selectedRole!,
         'schoolId': schoolId,
         'classId': selectedClass ?? '',
+        'parentId': selectedParent ?? '',
       });
 
       _nameController.clear();
@@ -199,31 +213,81 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
               ),
               SizedBox(height: 15),
               selectedRole == 'student'
-                  ? DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: 'Klasa',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: selectedClass,
-                      items: classesData!.keys.map((schoolId) {
-                        return DropdownMenuItem<String>(
-                          value: schoolId,
-                          child: Text(classesData![schoolId]),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedClass = value;
-                        });
-                      },
-                      validator: (value) =>
-                          value == null && selectedRole == 'student'
-                              ? 'Proszę wybrać klasę'
-                              : null,
+                  ? Column(
+                      children: [
+                        DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'Klasa',
+                            border: OutlineInputBorder(),
+                          ),
+                          value: selectedClass,
+                          items: classesData!.keys.map((schoolId) {
+                            return DropdownMenuItem<String>(
+                              value: schoolId,
+                              child: Text(classesData![schoolId]),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedClass = value;
+                            });
+                          },
+                          validator: (value) =>
+                              value == null && selectedRole == 'student'
+                                  ? 'Proszę wybrać klasę'
+                                  : null,
+                        ),
+                        SizedBox(height: 15),
+                        DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'Rodzic',
+                            border: OutlineInputBorder(),
+                          ),
+                          value: selectedParent,
+                          items: parentsData!.keys.map((schoolId) {
+                            return DropdownMenuItem<String>(
+                              value: schoolId,
+                              child: Text(parentsData![schoolId]),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedParent = value;
+                            });
+                          },
+                          validator: (value) =>
+                              value == null && selectedRole == 'student'
+                                  ? 'Proszę wybrać rodzica'
+                                  : null,
+                        ),
+                      ],
                     )
-                  : SizedBox(),
+                  : selectedRole == 'teacher'
+                      ? DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'Klasa',
+                            border: OutlineInputBorder(),
+                          ),
+                          value: selectedClass,
+                          items: classesData!.keys.map((schoolId) {
+                            return DropdownMenuItem<String>(
+                              value: schoolId,
+                              child: Text(classesData![schoolId]),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedClass = value;
+                            });
+                          },
+                          validator: (value) =>
+                              value == null && selectedRole == 'teacher'
+                                  ? 'Proszę wybrać klasę'
+                                  : null,
+                        )
+                      : SizedBox(),
               _errorMessage(),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               if (isLoading)
                 CircularProgressIndicator()
               else
@@ -233,6 +297,7 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
                   },
                   child: Text('Dodaj użytkownika'),
                 ),
+              SizedBox(height: 15),
               _signOutButton(),
             ],
           ),

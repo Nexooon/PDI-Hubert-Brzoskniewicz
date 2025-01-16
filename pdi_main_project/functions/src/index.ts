@@ -55,7 +55,8 @@ export const createUser = functions.https.onCall(async (request:
       "Only admins can create new users");
   }
 
-  const {name, surname, email, password, role, schoolId, classId} = data;
+  const {name, surname, email, password, role, schoolId, classId,
+    parentId} = data;
 
   try {
     if (role === "superAdmin" || role === "schoolAdmin") {
@@ -82,6 +83,7 @@ export const createUser = functions.https.onCall(async (request:
         school_id: admin.firestore().collection("schools").doc(schoolId),
         class_id: admin.firestore().collection("schools").doc(schoolId)
           .collection("classes").doc(classId),
+        parent_id: admin.firestore().collection("users").doc(parentId),
       });
     } else {
       await admin.firestore().collection("users").doc(userRecord.uid).set({

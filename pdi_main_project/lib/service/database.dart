@@ -34,6 +34,22 @@ class DatabaseMethods {
     return classesData;
   }
 
+  Future<Map<String, dynamic>> getParentsFromSchoolId(String schoolId) async {
+    QuerySnapshot<Map<String, dynamic>> usersSnapshot = await _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'parent')
+        .where('school_id',
+            isEqualTo: _firestore.collection('schools').doc(schoolId))
+        .get();
+
+    Map<String, dynamic> parentsData = {};
+    for (var classDoc in usersSnapshot.docs) {
+      parentsData[classDoc.id] = classDoc['name'] + ' ' + classDoc['surname'];
+    }
+
+    return parentsData;
+  }
+
   Future<Map<String, dynamic>> getSchools() async {
     QuerySnapshot<Map<String, dynamic>> schoolsSnapshot =
         await _firestore.collection('schools').get();

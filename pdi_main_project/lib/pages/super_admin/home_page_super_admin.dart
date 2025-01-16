@@ -73,7 +73,7 @@ class _HomePageSuperAdminState extends State<HomePageSuperAdmin> {
     try {
       final HttpsCallable callable =
           FirebaseFunctions.instance.httpsCallable('createSchoolAdmin');
-      final result = await callable.call({
+      await callable.call({
         'name': _nameController.text,
         'surname': _surnameController.text,
         'email': _emailController.text,
@@ -99,7 +99,6 @@ class _HomePageSuperAdminState extends State<HomePageSuperAdmin> {
           ),
         ),
       );
-      print(result.data['message']);
     } on FirebaseFunctionsException catch (e) {
       setState(() {
         errorMessage = e.message;
