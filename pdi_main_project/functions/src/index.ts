@@ -71,7 +71,7 @@ export const createUser = functions.https.onCall(async (request:
     });
 
     // ustawienie niestandardowych roszczeń (custom claims) dla użytkownika
-    await admin.auth().setCustomUserClaims(userRecord.uid, {role});
+    await admin.auth().setCustomUserClaims(userRecord.uid, {[role]: true});
 
     // zapisanie danych użytkownika w Firestore
     if (role === "student") {

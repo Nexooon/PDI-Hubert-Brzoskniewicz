@@ -28,6 +28,7 @@ class _WidgetTreeState extends State<WidgetTree> {
 
       DatabaseMethods databaseMethods = DatabaseMethods();
       print(currentUser.email);
+      print(token.claims);
 
       if (token.claims?['superAdmin'] == true) {
         return HomePageSuperAdmin();
