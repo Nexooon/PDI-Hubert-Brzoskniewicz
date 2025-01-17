@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:pdi_main_project/pages/announcements_page.dart';
+import 'package:pdi_main_project/pages/student/grades_page.dart';
 import 'package:pdi_main_project/service/auth.dart';
 import 'package:pdi_main_project/service/database.dart';
 
 class HomePageParent extends StatefulWidget {
   final String currentUserUid;
+  final String schoolId;
 
-  const HomePageParent({super.key, required this.currentUserUid});
+  const HomePageParent(
+      {super.key, required this.currentUserUid, required this.schoolId});
 
   @override
   State<HomePageParent> createState() => _HomePageParentState();
@@ -83,14 +87,14 @@ class _HomePageParentState extends State<HomePageParent> {
                               ElevatedButton(
                                 onPressed: () {
                                   // Nawigacja do strony z ocenami
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) => GradesPage(
-                                  //       childId: childId,
-                                  //     ),
-                                  //   ),
-                                  // );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => GradesPage(
+                                        currentUserUid: childId,
+                                      ),
+                                    ),
+                                  );
                                 },
                                 child: Text('Oceny'),
                               ),
@@ -117,6 +121,19 @@ class _HomePageParentState extends State<HomePageParent> {
                   ),
                 ),
                 // Tutaj będzie widget pokazujący ogłoszenia
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AnnouncementsPage(
+                            currentUserRole: 'parent',
+                            schoolId: widget.schoolId,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text('Ogłoszenia'))
               ],
             ),
           );

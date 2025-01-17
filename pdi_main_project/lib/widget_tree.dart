@@ -45,8 +45,10 @@ class _WidgetTreeState extends State<WidgetTree> {
           schoolId: schoolId,
         );
       } else if (token.claims?['parent'] == true) {
+        String schoolId = await databaseMethods.getSchoolId();
         return HomePageParent(
           currentUserUid: currentUserUid,
+          schoolId: schoolId,
         );
       }
     }
