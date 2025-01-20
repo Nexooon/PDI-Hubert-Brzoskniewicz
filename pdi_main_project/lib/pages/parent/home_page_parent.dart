@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pdi_main_project/pages/announcements_page.dart';
+import 'package:pdi_main_project/pages/announcements_widget.dart';
 import 'package:pdi_main_project/pages/student/grades_page.dart';
 import 'package:pdi_main_project/service/auth.dart';
 import 'package:pdi_main_project/service/database.dart';
@@ -120,7 +121,14 @@ class _HomePageParentState extends State<HomePageParent> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                // Tutaj będzie widget pokazujący ogłoszenia
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Najnowsze ogłoszenia',
+                      style: TextStyle(fontSize: 20)),
+                ),
+                Expanded(
+                  child: AnnouncementsWidget(schoolId: widget.schoolId),
+                ),
                 ElevatedButton(
                     onPressed: () {
                       Navigator.push(

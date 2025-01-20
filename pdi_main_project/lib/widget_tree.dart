@@ -35,8 +35,10 @@ class _WidgetTreeState extends State<WidgetTree> {
       } else if (token.claims?['schoolAdmin'] == true) {
         return HomePageSchoolAdmin();
       } else if (token.claims?['student'] == true) {
+        String schoolId = await databaseMethods.getSchoolId();
         return HomePageStudent(
           currentUserUid: currentUserUid,
+          schoolId: schoolId,
         );
       } else if (token.claims?['teacher'] == true) {
         String schoolId = await databaseMethods.getSchoolId();

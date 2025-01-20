@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pdi_main_project/pages/announcements_page.dart';
+import 'package:pdi_main_project/pages/announcements_widget.dart';
 import 'package:pdi_main_project/pages/teacher/subjects_page.dart';
 import 'package:pdi_main_project/service/auth.dart';
 
@@ -121,6 +122,14 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
             ),
             // Tutaj będzie widget pokazujący dzisiejszy plan zajęć
             SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
+                  Text('Najnowsze ogłoszenia', style: TextStyle(fontSize: 20)),
+            ),
+            Expanded(
+              child: AnnouncementsWidget(schoolId: widget.schoolId),
+            ),
           ],
         ),
       ),

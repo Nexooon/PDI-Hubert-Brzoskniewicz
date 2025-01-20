@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:pdi_main_project/pages/announcements_widget.dart';
 import 'package:pdi_main_project/service/auth.dart';
 import 'package:pdi_main_project/pages/student/grades_page.dart';
 
 class HomePageStudent extends StatefulWidget {
   final String currentUserUid;
+  final String schoolId;
 
-  const HomePageStudent({super.key, required this.currentUserUid});
+  const HomePageStudent(
+      {super.key, required this.currentUserUid, required this.schoolId});
 
   @override
   State<HomePageStudent> createState() => _HomePageStudentState();
@@ -151,6 +154,14 @@ class _HomePageStudentState extends State<HomePageStudent> {
               ),
             ),
             // Tutaj będzie widget pokazujący ostatnie oceny
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
+                  Text('Najnowsze ogłoszenia', style: TextStyle(fontSize: 20)),
+            ),
+            Expanded(
+              child: AnnouncementsWidget(schoolId: widget.schoolId),
+            ),
           ],
         ),
       ),
