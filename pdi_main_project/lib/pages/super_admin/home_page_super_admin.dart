@@ -155,25 +155,28 @@ class _HomePageSuperAdminState extends State<HomePageSuperAdmin> {
               ),
               SizedBox(height: 15),
               schoolsData != null
-                  ? DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: 'Szkoła',
-                        border: OutlineInputBorder(),
+                  ? SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Szkoła',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: selectedSchool,
+                        items: schoolsData!.keys.map((schoolId) {
+                          return DropdownMenuItem<String>(
+                            value: schoolId,
+                            child: Text(schoolsData![schoolId]),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedSchool = value;
+                          });
+                        },
+                        validator: (value) =>
+                            value == null ? 'Proszę wybrać szkołę' : null,
                       ),
-                      value: selectedSchool,
-                      items: schoolsData!.keys.map((schoolId) {
-                        return DropdownMenuItem<String>(
-                          value: schoolId,
-                          child: Text(schoolsData![schoolId]),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedSchool = value;
-                        });
-                      },
-                      validator: (value) =>
-                          value == null ? 'Proszę wybrać szkołę' : null,
                     )
                   : CircularProgressIndicator(),
               _errorMessage(),
