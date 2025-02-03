@@ -24,17 +24,17 @@ class SubjectsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Przedmioty nauczyciela'),
+        title: const Text('Przedmioty nauczyciela'),
       ),
       body: FutureBuilder<Map<String, Map<String, List<Map<String, String>>>>>(
         future: DatabaseMethods().getTeacherSubjects(teacherId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Błąd: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Brak przedmiotów'));
+            return const Center(child: Text('Brak przedmiotów'));
           } else {
             Map<String, Map<String, List<Map<String, String>>>> teacherData =
                 snapshot.data!;

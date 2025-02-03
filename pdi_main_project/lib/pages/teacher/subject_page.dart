@@ -19,18 +19,18 @@ class SubjectPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Strona przedmiotowa'),
+        title: const Text('Strona przedmiotowa'),
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future:
             DatabaseMethods().getSubjectDetails(schoolId, classId, subjectId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Błąd: ${snapshot.error}'));
           } else if (!snapshot.hasData || !snapshot.data!.exists) {
-            return Center(child: Text('Brak danych o przedmiocie'));
+            return const Center(child: Text('Brak danych o przedmiocie'));
           } else {
             var subjectData = snapshot.data!.data() as Map<String, dynamic>;
             return Padding(
@@ -40,9 +40,10 @@ class SubjectPage extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     'Nazwa przedmiotu: ${subjectData['name']}',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: 200.0,
                     child: FloatingActionButton(
@@ -60,7 +61,7 @@ class SubjectPage extends StatelessWidget {
                           ),
                         );
                       },
-                      child: Text('Zarządzaj ocenami'),
+                      child: const Text('Zarządzaj ocenami'),
                     ),
                   ),
                 ],

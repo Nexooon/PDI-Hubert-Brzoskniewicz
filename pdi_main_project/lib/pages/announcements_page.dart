@@ -42,11 +42,11 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
           children: [
             TextField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: 'Tytuł'),
+              decoration: const InputDecoration(labelText: 'Tytuł'),
             ),
             TextField(
               controller: _contentController,
-              decoration: InputDecoration(labelText: 'Treść'),
+              decoration: const InputDecoration(labelText: 'Treść'),
               keyboardType: TextInputType.multiline,
               maxLines: null,
             ),
@@ -55,7 +55,7 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Anuluj'),
+            child: const Text('Anuluj'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -96,17 +96,17 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ogłoszenia szkolne'),
+        title: const Text('Ogłoszenia szkolne'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _databaseMethods.getAnnouncements(widget.schoolId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('Brak ogłoszeń'));
+            return const Center(child: Text('Brak ogłoszeń'));
           }
 
           final announcements = snapshot.data!.docs;
@@ -139,7 +139,8 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: Icon(Icons.edit, color: Colors.blue),
+                                  icon: const Icon(Icons.edit,
+                                      color: Colors.blue),
                                   onPressed: () => _showEditDialog(
                                     announcementId: announcementId,
                                     currentTitle: title,
@@ -147,7 +148,8 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.red),
                                   onPressed: () async {
                                     await _databaseMethods
                                         .deleteAnnouncement(announcementId);
@@ -179,7 +181,7 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
       floatingActionButton: isTeacher
           ? FloatingActionButton(
               onPressed: () => _showEditDialog(),
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             )
           : null,
     );

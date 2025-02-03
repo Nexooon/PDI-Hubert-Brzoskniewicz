@@ -31,9 +31,9 @@ class _WidgetTreeState extends State<WidgetTree> {
       print(token.claims);
 
       if (token.claims?['superAdmin'] == true) {
-        return HomePageSuperAdmin();
+        return const HomePageSuperAdmin();
       } else if (token.claims?['schoolAdmin'] == true) {
-        return HomePageSchoolAdmin();
+        return const HomePageSchoolAdmin();
       } else if (token.claims?['student'] == true) {
         String schoolId = await databaseMethods.getSchoolId();
         return HomePageStudent(
@@ -63,7 +63,7 @@ class _WidgetTreeState extends State<WidgetTree> {
       stream: Auth().authStateChanges,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
+          return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
             ),
@@ -73,7 +73,7 @@ class _WidgetTreeState extends State<WidgetTree> {
             future: getHomePage(),
             builder: (context, AsyncSnapshot<Widget> homePageSnapshot) {
               if (homePageSnapshot.connectionState == ConnectionState.waiting) {
-                return Scaffold(
+                return const Scaffold(
                   body: Center(
                     child: CircularProgressIndicator(),
                   ),

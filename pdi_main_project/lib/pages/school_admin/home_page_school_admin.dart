@@ -128,7 +128,7 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
             'Użytkownik dodany pomyślnie!',
             selectionColor: Colors.green,
@@ -154,7 +154,7 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('School Admin - strona główna'),
+        title: const Text('School Admin - strona główna'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -164,36 +164,36 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Imię'),
+                decoration: const InputDecoration(labelText: 'Imię'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Proszę wpisać imię'
                     : null,
               ),
               TextFormField(
                 controller: _surnameController,
-                decoration: InputDecoration(labelText: 'Nazwisko'),
+                decoration: const InputDecoration(labelText: 'Nazwisko'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Proszę wpisać nazwisko'
                     : null,
               ),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'Email'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Proszę wpisać email'
                     : null,
               ),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Hasło'),
+                decoration: const InputDecoration(labelText: 'Hasło'),
                 obscureText: false,
                 validator: (value) => value == null || value.isEmpty
                     ? 'Proszę wpisać hasło'
                     : null,
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Rola',
                   border: OutlineInputBorder(),
                 ),
@@ -212,12 +212,12 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
                 validator: (value) =>
                     value == null ? 'Proszę wybrać rolę' : null,
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               selectedRole == 'student'
                   ? Column(
                       children: [
                         DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Klasa',
                             border: OutlineInputBorder(),
                           ),
@@ -238,9 +238,9 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
                                   ? 'Proszę wybrać klasę'
                                   : null,
                         ),
-                        SizedBox(height: 15),
+                        const SizedBox(height: 15),
                         DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Rodzic',
                             border: OutlineInputBorder(),
                           ),
@@ -265,7 +265,7 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
                     )
                   : selectedRole == 'teacher'
                       ? DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Klasa',
                             border: OutlineInputBorder(),
                           ),
@@ -286,19 +286,19 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
                                   ? 'Proszę wybrać klasę'
                                   : null,
                         )
-                      : SizedBox(),
+                      : const SizedBox(),
               _errorMessage(),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               if (isLoading)
-                CircularProgressIndicator()
+                const CircularProgressIndicator()
               else
                 ElevatedButton(
                   onPressed: () async {
                     await createUser();
                   },
-                  child: Text('Dodaj użytkownika'),
+                  child: const Text('Dodaj użytkownika'),
                 ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               _signOutButton(),
             ],
           ),

@@ -92,7 +92,7 @@ class _HomePageSuperAdminState extends State<HomePageSuperAdmin> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
             'Użytkownik dodany pomyślnie!',
             selectionColor: Colors.green,
@@ -116,7 +116,7 @@ class _HomePageSuperAdminState extends State<HomePageSuperAdmin> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Super Admin - strona główna'),
+        title: const Text('Super Admin - strona główna'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -126,39 +126,39 @@ class _HomePageSuperAdminState extends State<HomePageSuperAdmin> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Imię'),
+                decoration: const InputDecoration(labelText: 'Imię'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Proszę wpisać imię'
                     : null,
               ),
               TextFormField(
                 controller: _surnameController,
-                decoration: InputDecoration(labelText: 'Nazwisko'),
+                decoration: const InputDecoration(labelText: 'Nazwisko'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Proszę wpisać nazwisko'
                     : null,
               ),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'Email'),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Proszę wpisać email'
                     : null,
               ),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Hasło'),
+                decoration: const InputDecoration(labelText: 'Hasło'),
                 obscureText: false,
                 validator: (value) => value == null || value.isEmpty
                     ? 'Proszę wpisać hasło'
                     : null,
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               schoolsData != null
                   ? SizedBox(
                       width: MediaQuery.of(context).size.width * 0.9,
                       child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Szkoła',
                           border: OutlineInputBorder(),
                         ),
@@ -178,19 +178,19 @@ class _HomePageSuperAdminState extends State<HomePageSuperAdmin> {
                             value == null ? 'Proszę wybrać szkołę' : null,
                       ),
                     )
-                  : CircularProgressIndicator(),
+                  : const CircularProgressIndicator(),
               _errorMessage(),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               if (isLoading)
-                CircularProgressIndicator()
+                const CircularProgressIndicator()
               else
                 ElevatedButton(
                   onPressed: () async {
                     await createSchoolAdmin();
                   },
-                  child: Text('Dodaj szkolnego administratora'),
+                  child: const Text('Dodaj szkolnego administratora'),
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _signOutButton(),
             ],
           ),

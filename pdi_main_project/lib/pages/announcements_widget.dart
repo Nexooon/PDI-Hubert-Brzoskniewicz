@@ -30,7 +30,7 @@ class AnnouncementsWidget extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Zamknij'),
+            child: const Text('Zamknij'),
           ),
         ],
       ),
@@ -43,11 +43,11 @@ class AnnouncementsWidget extends StatelessWidget {
       stream: getLatestAnnouncements(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('Brak ogłoszeń'));
+          return const Center(child: Text('Brak ogłoszeń'));
         }
 
         final announcements = snapshot.data!.docs;

@@ -24,14 +24,14 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Strona Główna'),
+        title: const Text('Strona Główna'),
         backgroundColor: Colors.blue,
       ),
       drawer: Drawer(
         width: 240.0,
         child: Column(
           children: <Widget>[
-            SizedBox(
+            const SizedBox(
               width: double.infinity,
               height: 140.0,
               child: DrawerHeader(
@@ -48,15 +48,15 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.calendar_month_outlined),
-              title: Text('Plan zajęć'),
+              leading: const Icon(Icons.calendar_month_outlined),
+              title: const Text('Plan zajęć'),
               onTap: () {
                 // Przejście do strony z planem zajęć
               },
             ),
             ListTile(
-              leading: Icon(Icons.announcement_outlined),
-              title: Text('Ogłoszenia'),
+              leading: const Icon(Icons.announcement_outlined),
+              title: const Text('Ogłoszenia'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -71,8 +71,8 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.menu_book_rounded),
-              title: Text('Strony przedmiotowe'),
+              leading: const Icon(Icons.menu_book_rounded),
+              title: const Text('Strony przedmiotowe'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -89,11 +89,11 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
               child: Container(),
             ),
             ListTile(
-              leading: Icon(
+              leading: const Icon(
                 Icons.logout,
                 color: Colors.black,
               ),
-              title: Text(
+              title: const Text(
                 'Wyloguj się',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
@@ -102,7 +102,7 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
                 signOut();
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 20.0,
             ),
           ],
@@ -113,7 +113,7 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
+            const Text(
               'Dzisiejszy plan zajęć',
               style: TextStyle(
                 fontSize: 24,
@@ -121,9 +121,9 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
               ),
             ),
             // Tutaj będzie widget pokazujący dzisiejszy plan zajęć
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
               child:
                   Text('Najnowsze ogłoszenia', style: TextStyle(fontSize: 20)),
             ),

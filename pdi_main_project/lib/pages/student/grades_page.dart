@@ -34,20 +34,20 @@ class _GradesPageState extends State<GradesPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Szczegóły oceny'),
+          title: const Text('Szczegóły oceny'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('Ocena: $grade'),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text('Opis: $description'),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text('Data: ${convertDateTime(date.toLocal())}'),
             ],
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Zamknij'),
+              child: const Text('Zamknij'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -129,30 +129,31 @@ class _GradesPageState extends State<GradesPage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             appBar: AppBar(
-              title: Text('Oceny Ucznia'),
+              title: const Text('Oceny Ucznia'),
               backgroundColor: Colors.blue,
             ),
-            body: Center(child: CircularProgressIndicator()),
+            body: const Center(child: CircularProgressIndicator()),
           );
         }
 
         if (snapshot.hasError) {
           return Scaffold(
             appBar: AppBar(
-              title: Text('Oceny Ucznia'),
+              title: const Text('Oceny Ucznia'),
               backgroundColor: Colors.blue,
             ),
-            body: Center(child: Text('Wystąpił błąd podczas ładowania ocen.')),
+            body: const Center(
+                child: Text('Wystąpił błąd podczas ładowania ocen.')),
           );
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Scaffold(
             appBar: AppBar(
-              title: Text('Oceny Ucznia'),
+              title: const Text('Oceny Ucznia'),
               backgroundColor: Colors.blue,
             ),
-            body: Center(child: Text('Brak ocen do wyświetlenia.')),
+            body: const Center(child: Text('Brak ocen do wyświetlenia.')),
           );
         }
 
@@ -161,7 +162,7 @@ class _GradesPageState extends State<GradesPage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('Oceny Ucznia'),
+            title: const Text('Oceny Ucznia'),
             backgroundColor: Colors.blue,
           ),
           body: Padding(
@@ -171,7 +172,8 @@ class _GradesPageState extends State<GradesPage> {
                 return ExpansionTile(
                   title: Text(
                     year,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   initiallyExpanded: year == schoolYears.keys.first,
                   children: schoolYears[year]!.map((subjectData) {
@@ -184,17 +186,17 @@ class _GradesPageState extends State<GradesPage> {
                           children: [
                             Text(
                               subjectData['subject'],
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 10),
-                            Text(
+                            const SizedBox(height: 10),
+                            const Text(
                               'Oceny cząstkowe:',
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             Wrap(
                               spacing: 5.0,
                               runSpacing: 5.0,
@@ -208,15 +210,16 @@ class _GradesPageState extends State<GradesPage> {
                                     gradeData['date'],
                                   ),
                                   child: Container(
-                                    margin: EdgeInsets.symmetric(horizontal: 5),
-                                    padding: EdgeInsets.all(8),
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: Colors.blue[100],
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
                                       gradeData['grade'],
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -225,8 +228,8 @@ class _GradesPageState extends State<GradesPage> {
                                 );
                               }).toList(),
                             ),
-                            SizedBox(height: 10),
-                            Text(
+                            const SizedBox(height: 10),
+                            const Text(
                               'Ocena końcowa:',
                               style: TextStyle(
                                 fontSize: 16,
@@ -242,15 +245,15 @@ class _GradesPageState extends State<GradesPage> {
                                 subjectData['finalGrade']['date'],
                               ),
                               child: Container(
-                                margin: EdgeInsets.symmetric(vertical: 5),
-                                padding: EdgeInsets.all(10),
+                                margin: const EdgeInsets.symmetric(vertical: 5),
+                                padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   color: Colors.green[200],
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   subjectData['finalGrade']['grade'],
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),

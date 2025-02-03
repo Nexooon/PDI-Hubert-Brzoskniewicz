@@ -33,12 +33,12 @@ class _HomePageParentState extends State<HomePageParent> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Rodzic - strona główna'),
+        title: const Text('Rodzic - strona główna'),
         backgroundColor: Colors.blue,
         actions: [
           TextButton.icon(
-            icon: Icon(Icons.logout, color: Colors.white),
-            label: Text(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            label: const Text(
               'Wyloguj',
               style: TextStyle(color: Colors.white),
             ),
@@ -50,13 +50,13 @@ class _HomePageParentState extends State<HomePageParent> {
         future: _loadChildrenData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Błąd podczas ładowania danych'));
+            return const Center(child: Text('Błąd podczas ładowania danych'));
           } else if (snapshot.data!.containsKey('error')) {
             return Center(child: Text('Błąd: ${snapshot.data!['error']}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Brak danych o dzieciach'));
+            return const Center(child: Text('Brak danych o dzieciach'));
           }
 
           Map<String, dynamic> children = snapshot.data!;
@@ -65,14 +65,14 @@ class _HomePageParentState extends State<HomePageParent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
+                const Text(
                   'Twoje dzieci',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Expanded(
                   child: ListView.builder(
                     itemCount: children.length,
@@ -97,14 +97,14 @@ class _HomePageParentState extends State<HomePageParent> {
                                     ),
                                   );
                                 },
-                                child: Text('Oceny'),
+                                child: const Text('Oceny'),
                               ),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               ElevatedButton(
                                 onPressed: () {
                                   // Nawigacja do strony z frekwencją
                                 },
-                                child: Text('Frekwencja'),
+                                child: const Text('Frekwencja'),
                               ),
                             ],
                           ),
@@ -113,16 +113,16 @@ class _HomePageParentState extends State<HomePageParent> {
                     },
                   ),
                 ),
-                SizedBox(height: 20),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   'Ogłoszenia',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
                   child: Text('Najnowsze ogłoszenia',
                       style: TextStyle(fontSize: 20)),
                 ),
@@ -141,7 +141,7 @@ class _HomePageParentState extends State<HomePageParent> {
                         ),
                       );
                     },
-                    child: Text('Ogłoszenia'))
+                    child: const Text('Ogłoszenia'))
               ],
             ),
           );
