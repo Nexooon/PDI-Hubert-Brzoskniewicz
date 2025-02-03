@@ -88,31 +88,45 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
       int currentWeight,
       String gradeId) {
     TextEditingController gradeController =
-        TextEditingController(text: currentGrade);
+        TextEditingController(text: currentGrade == '-' ? "" : currentGrade);
     TextEditingController weightController =
         TextEditingController(text: currentWeight.toString());
+    ValueNotifier<String> errorMessage = ValueNotifier('');
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Edytuj ocenę i wagę'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(studentName),
-              SizedBox(height: 8),
-              TextField(
-                controller: gradeController,
-                decoration: InputDecoration(labelText: 'Ocena za $gradeType'),
-              ),
-              TextField(
-                controller: weightController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Waga'),
-              ),
-            ],
-          ),
+          content: ValueListenableBuilder(
+              valueListenable: errorMessage,
+              builder: (context, value, child) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(studentName),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: gradeController,
+                      decoration:
+                          InputDecoration(labelText: 'Ocena za $gradeType'),
+                    ),
+                    TextField(
+                      controller: weightController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Waga'),
+                    ),
+                    if (value.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          value,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                  ],
+                );
+              }),
           actions: [
             TextButton(
               onPressed: () {
@@ -122,35 +136,39 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
             ),
             TextButton(
               onPressed: () {
-                var gradeInfo = {
-                  'student_id': FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(studentId),
-                  'subject_id': FirebaseFirestore.instance
-                      .collection('schools')
-                      .doc(widget.schoolId)
-                      .collection('classes')
-                      .doc(widget.classId)
-                      .collection('subjects')
-                      .doc(widget.subjectId),
-                  'subject_name': widget.subjectName,
-                  'description': gradeType,
-                  'grade_value': gradeController.text,
-                  'weight': int.parse(weightController.text),
-                  'school_year': widget.year,
-                  'is_final': false,
-                  'date': Timestamp.now().toDate(),
-                };
-                if (currentGrade == '-') {
-                  DatabaseMethods().addGrade(gradeInfo);
-                } else {
-                  DatabaseMethods().updateGrade(gradeId, gradeInfo);
-                }
+                try {
+                  var gradeInfo = {
+                    'student_id': FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(studentId),
+                    'subject_id': FirebaseFirestore.instance
+                        .collection('schools')
+                        .doc(widget.schoolId)
+                        .collection('classes')
+                        .doc(widget.classId)
+                        .collection('subjects')
+                        .doc(widget.subjectId),
+                    'subject_name': widget.subjectName,
+                    'description': gradeType,
+                    'grade_value': gradeController.text,
+                    'weight': int.parse(weightController.text),
+                    'school_year': widget.year,
+                    'is_final': false,
+                    'date': Timestamp.now().toDate(),
+                  };
+                  if (currentGrade == '-') {
+                    DatabaseMethods().addGrade(gradeInfo);
+                  } else {
+                    DatabaseMethods().updateGrade(gradeId, gradeInfo);
+                  }
 
-                setState(() {
-                  _loadGrades();
-                });
-                Navigator.of(context).pop();
+                  setState(() {
+                    _loadGrades();
+                  });
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  errorMessage.value = 'Waga musi być liczbą całkowitą';
+                }
               },
               child: const Text('Zapisz'),
             ),
@@ -160,20 +178,38 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
     );
   }
 
-  //TODO nie dziala
-  // Funkcja do masowej edycji wagi dla całej kolumny
-  void _editColumnWeight(BuildContext context, String gradeType) {
+  void _editColumnWeight(BuildContext context, String gradeType,
+      List<Map<String, dynamic>> studentsGrades) {
     TextEditingController weightController = TextEditingController();
+    ValueNotifier<String> errorMessage = ValueNotifier('');
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Edytuj wagę dla $gradeType'),
-          content: TextField(
-            controller: weightController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Waga'),
+          content: ValueListenableBuilder<String>(
+            valueListenable: errorMessage,
+            builder: (context, value, child) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: weightController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Waga'),
+                  ),
+                  if (value.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        value,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
           actions: [
             TextButton(
@@ -184,15 +220,23 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
             ),
             TextButton(
               onPressed: () {
-                // setState(() {
-                //   int newWeight = int.parse(weightController.text);
-                //   for (var student in studentsGrades) {
-                //     if (student['grades'].containsKey(gradeType)) {
-                //       student['grades'][gradeType]['weight'] = newWeight;
-                //     }
-                //   }
-                // });
-                Navigator.of(context).pop();
+                try {
+                  int newWeight = int.parse(weightController.text);
+                  for (var student in studentsGrades) {
+                    if (student['grades'].containsKey(gradeType)) {
+                      DatabaseMethods().updateGrade(
+                          student['grades'][gradeType]['grade_id'], {
+                        'weight': newWeight,
+                      });
+                    }
+                  }
+                  setState(() {
+                    _loadGrades();
+                  });
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  errorMessage.value = 'Waga musi być liczbą całkowitą';
+                }
               },
               child: const Text('Zapisz'),
             ),
@@ -248,11 +292,11 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
           future: _studentsGradesFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(child: Text('Błąd: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('Brak ocen'));
+              return const Center(child: Text('Brak ocen'));
             } else {
               List<Map<String, dynamic>> studentsGrades = snapshot.data!;
 
@@ -264,60 +308,68 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
 
               return Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: DataTable(
-                  columns: [
-                    const DataColumn(label: Text('Uczeń')),
-                    ...gradeTypes.map((gradeType) {
-                      return DataColumn(
-                        label: Row(
-                          children: [
-                            Text(gradeType),
-                            IconButton(
-                              icon: const Icon(Icons.edit, size: 18),
-                              onPressed: () =>
-                                  _editColumnWeight(context, gradeType),
-                              tooltip: 'Edytuj wagę kolumny',
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                  rows: studentsGrades.map((student) {
-                    return DataRow(
-                      cells: [
-                        DataCell(Text(student['name'])),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      columns: [
+                        const DataColumn(label: Text('Uczeń')),
                         ...gradeTypes.map((gradeType) {
-                          final gradeData = student['grades'][gradeType];
-                          final gradeValue = gradeData?['value'] ?? '-';
-                          final gradeWeight = gradeData?['weight'] ?? 0;
-                          final gradeId = gradeData?['grade_id'] ?? '';
-
-                          return DataCell(
-                            GestureDetector(
-                              onTap: () => _editGrade(
-                                  context,
-                                  student['student_id'],
-                                  student['name'],
-                                  gradeType,
-                                  gradeValue,
-                                  gradeWeight,
-                                  gradeId),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(gradeValue),
-                                  Text('Waga: $gradeWeight',
-                                      style: const TextStyle(
-                                          fontSize: 12, color: Colors.grey)),
-                                ],
-                              ),
+                          return DataColumn(
+                            label: Row(
+                              children: [
+                                Text(gradeType),
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 18),
+                                  onPressed: () => _editColumnWeight(
+                                      context, gradeType, studentsGrades),
+                                  tooltip: 'Edytuj wagę kolumny',
+                                ),
+                              ],
                             ),
                           );
                         }).toList(),
                       ],
-                    );
-                  }).toList(),
+                      rows: studentsGrades.map((student) {
+                        return DataRow(
+                          cells: [
+                            DataCell(Text(student['name'])),
+                            ...gradeTypes.map((gradeType) {
+                              final gradeData = student['grades'][gradeType];
+                              final gradeValue = gradeData?['value'] ?? '-';
+                              final gradeWeight = gradeData?['weight'] ?? 0;
+                              final gradeId = gradeData?['grade_id'] ?? '';
+
+                              return DataCell(
+                                GestureDetector(
+                                  onTap: () => _editGrade(
+                                      context,
+                                      student['student_id'],
+                                      student['name'],
+                                      gradeType,
+                                      gradeValue,
+                                      gradeWeight,
+                                      gradeId),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(gradeValue),
+                                      Text('Waga: $gradeWeight',
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey)),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
               );
             }
