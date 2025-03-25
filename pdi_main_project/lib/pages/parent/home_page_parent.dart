@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pdi_main_project/pages/announcements_page.dart';
 import 'package:pdi_main_project/pages/announcements_widget.dart';
+import 'package:pdi_main_project/pages/student/attendance_page.dart';
 import 'package:pdi_main_project/pages/student/grades_page.dart';
 import 'package:pdi_main_project/service/auth.dart';
 import 'package:pdi_main_project/service/database.dart';
@@ -8,9 +9,13 @@ import 'package:pdi_main_project/service/database.dart';
 class HomePageParent extends StatefulWidget {
   final String currentUserUid;
   final String schoolId;
+  final DatabaseMethods databaseMethods;
 
   const HomePageParent(
-      {super.key, required this.currentUserUid, required this.schoolId});
+      {super.key,
+      required this.currentUserUid,
+      required this.schoolId,
+      required this.databaseMethods});
 
   @override
   State<HomePageParent> createState() => _HomePageParentState();
@@ -19,7 +24,7 @@ class HomePageParent extends StatefulWidget {
 class _HomePageParentState extends State<HomePageParent> {
   Future<Map<String, dynamic>> _loadChildrenData() async {
     try {
-      return await DatabaseMethods().getChildren(widget.currentUserUid);
+      return await widget.databaseMethods.getChildren(widget.currentUserUid);
     } catch (e) {
       return {'error': e.toString()};
     }
@@ -103,6 +108,14 @@ class _HomePageParentState extends State<HomePageParent> {
                               ElevatedButton(
                                 onPressed: () {
                                   // Nawigacja do strony z frekwencją
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AttendancePage(
+                                        currentUserUid: childId,
+                                      ),
+                                    ),
+                                  );
                                 },
                                 child: const Text('Frekwencja'),
                               ),
@@ -127,7 +140,10 @@ class _HomePageParentState extends State<HomePageParent> {
                       style: TextStyle(fontSize: 20)),
                 ),
                 Expanded(
-                  child: AnnouncementsWidget(schoolId: widget.schoolId),
+                  child: AnnouncementsWidget(
+                    databaseMethods: widget.databaseMethods,
+                    schoolId: widget.schoolId,
+                  ),
                 ),
                 ElevatedButton(
                     onPressed: () {

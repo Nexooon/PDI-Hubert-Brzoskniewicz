@@ -3,13 +3,18 @@ import 'package:pdi_main_project/pages/announcements_page.dart';
 import 'package:pdi_main_project/pages/announcements_widget.dart';
 import 'package:pdi_main_project/pages/teacher/subjects_page.dart';
 import 'package:pdi_main_project/service/auth.dart';
+import 'package:pdi_main_project/service/database.dart';
 
 class HomePageTeacher extends StatefulWidget {
   final String currentUserUid;
   final String schoolId;
+  final DatabaseMethods databaseMethods;
 
   const HomePageTeacher(
-      {super.key, required this.currentUserUid, required this.schoolId});
+      {super.key,
+      required this.currentUserUid,
+      required this.schoolId,
+      required this.databaseMethods});
 
   @override
   State<HomePageTeacher> createState() => _HomePageTeacherState();
@@ -128,7 +133,10 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
                   Text('Najnowsze ogłoszenia', style: TextStyle(fontSize: 20)),
             ),
             Expanded(
-              child: AnnouncementsWidget(schoolId: widget.schoolId),
+              child: AnnouncementsWidget(
+                databaseMethods: widget.databaseMethods,
+                schoolId: widget.schoolId,
+              ),
             ),
           ],
         ),

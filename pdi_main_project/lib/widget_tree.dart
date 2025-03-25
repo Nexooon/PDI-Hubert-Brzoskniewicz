@@ -39,18 +39,21 @@ class _WidgetTreeState extends State<WidgetTree> {
         return HomePageStudent(
           currentUserUid: currentUserUid,
           schoolId: schoolId,
+          databaseMethods: databaseMethods,
         );
       } else if (token.claims?['teacher'] == true) {
         String schoolId = await databaseMethods.getSchoolId();
         return HomePageTeacher(
           currentUserUid: currentUserUid,
           schoolId: schoolId,
+          databaseMethods: databaseMethods,
         );
       } else if (token.claims?['parent'] == true) {
         String schoolId = await databaseMethods.getSchoolId();
         return HomePageParent(
           currentUserUid: currentUserUid,
           schoolId: schoolId,
+          databaseMethods: databaseMethods,
         );
       }
     }

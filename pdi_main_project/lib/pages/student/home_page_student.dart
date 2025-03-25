@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:pdi_main_project/pages/announcements_page.dart';
 import 'package:pdi_main_project/pages/announcements_widget.dart';
 import 'package:pdi_main_project/service/auth.dart';
 import 'package:pdi_main_project/pages/student/grades_page.dart';
+import 'package:pdi_main_project/service/database.dart';
 
 class HomePageStudent extends StatefulWidget {
   final String currentUserUid;
   final String schoolId;
+  final DatabaseMethods databaseMethods;
 
   const HomePageStudent(
-      {super.key, required this.currentUserUid, required this.schoolId});
+      {super.key,
+      required this.currentUserUid,
+      required this.schoolId,
+      required this.databaseMethods});
 
   @override
   State<HomePageStudent> createState() => _HomePageStudentState();
@@ -94,6 +100,15 @@ class _HomePageStudentState extends State<HomePageStudent> {
                       leading: const Icon(Icons.announcement_outlined),
                       title: const Text('Ogłoszenia'),
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AnnouncementsPage(
+                              currentUserRole: 'student',
+                              schoolId: widget.schoolId,
+                            ),
+                          ),
+                        );
                         // Przejście do strony z ogłoszeniami
                       },
                     ),
@@ -160,7 +175,9 @@ class _HomePageStudentState extends State<HomePageStudent> {
                   Text('Najnowsze ogłoszenia', style: TextStyle(fontSize: 20)),
             ),
             Expanded(
-              child: AnnouncementsWidget(schoolId: widget.schoolId),
+              child: AnnouncementsWidget(
+                  databaseMethods: widget.databaseMethods,
+                  schoolId: widget.schoolId),
             ),
           ],
         ),
