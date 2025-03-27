@@ -4,8 +4,10 @@ import 'package:pdi_main_project/service/database.dart';
 
 class AttendancePage extends StatefulWidget {
   final String currentUserUid;
+  final DatabaseMethods databaseMethods;
 
-  const AttendancePage({super.key, required this.currentUserUid});
+  const AttendancePage(
+      {super.key, required this.currentUserUid, required this.databaseMethods});
 
   @override
   State<AttendancePage> createState() => _AttendancePageState();
@@ -18,8 +20,7 @@ class _AttendancePageState extends State<AttendancePage> {
   void initState() {
     super.initState();
     _attendanceFuture =
-        DatabaseMethods().getStudentAttendance(widget.currentUserUid);
-    print(_attendanceFuture);
+        widget.databaseMethods.getStudentAttendance(widget.currentUserUid);
   }
 
   @override
@@ -38,7 +39,6 @@ class _AttendancePageState extends State<AttendancePage> {
           }
 
           final attendanceData = snapshot.data!;
-          print(attendanceData);
           return ListView(
             padding: const EdgeInsets.all(8.0),
             children: [

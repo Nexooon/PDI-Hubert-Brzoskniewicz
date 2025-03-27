@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pdi_main_project/service/database.dart';
 
 class AnnouncementsPage extends StatefulWidget {
   final String currentUserRole; // "teacher" lub "student"/"parent"
   final String schoolId; // ID szkoły
+  final DatabaseMethods databaseMethods;
 
   const AnnouncementsPage({
     super.key,
     required this.currentUserRole,
     required this.schoolId,
+    required this.databaseMethods,
   });
 
   @override
@@ -19,8 +20,14 @@ class AnnouncementsPage extends StatefulWidget {
 class _AnnouncementsPageState extends State<AnnouncementsPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
-  final DatabaseMethods _databaseMethods = DatabaseMethods();
+  late final DatabaseMethods _databaseMethods;
   final Map<int, bool> _expandedState = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _databaseMethods = widget.databaseMethods;
+  }
 
   void _showEditDialog(
       {String? announcementId, String? currentTitle, String? currentContent}) {
@@ -98,24 +105,24 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
       appBar: AppBar(
         title: const Text('Ogłoszenia szkolne'),
       ),
-      body: StreamBuilder<QuerySnapshot>(
+      body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: _databaseMethods.getAnnouncements(widget.schoolId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('Brak ogłoszeń'));
           }
 
-          final announcements = snapshot.data!.docs;
+          final announcements = snapshot.data!;
 
           return ListView.builder(
             itemCount: announcements.length,
             itemBuilder: (context, index) {
               final announcement = announcements[index];
-              final announcementId = announcement.id;
+              final announcementId = announcement['id'];
               final title = announcement['title'];
               final content = announcement['content'];
               final isExpanded = _expandedState[index] ?? false;

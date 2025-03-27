@@ -4,19 +4,23 @@ import 'package:pdi_main_project/service/database.dart';
 
 class GradesPage extends StatefulWidget {
   final String currentUserUid;
-  const GradesPage({super.key, required this.currentUserUid});
+  final DatabaseMethods databaseMethods;
+
+  const GradesPage(
+      {super.key, required this.currentUserUid, required this.databaseMethods});
 
   @override
   State<GradesPage> createState() => _GradesPageState();
 }
 
 class _GradesPageState extends State<GradesPage> {
-  late Future<QuerySnapshot<Map<String, dynamic>>> _gradesFuture;
+  late Future<List<Map<String, dynamic>>> _gradesFuture;
 
   @override
   void initState() {
     super.initState();
-    _gradesFuture = DatabaseMethods().getStudentGrades(widget.currentUserUid);
+    _gradesFuture =
+        widget.databaseMethods.getStudentGrades(widget.currentUserUid);
   }
 
   String convertDateTime(DateTime dateTime) {
@@ -60,11 +64,11 @@ class _GradesPageState extends State<GradesPage> {
 
   // Przekształcenie danych z Firestore do struktury używanej w UI
   Map<String, List<Map<String, dynamic>>> _organizeGrades(
-      QuerySnapshot<Map<String, dynamic>> snapshot) {
+      List<Map<String, dynamic>> snapshot) {
     Map<String, List<Map<String, dynamic>>> organized = {};
 
-    for (var doc in snapshot.docs) {
-      var data = doc.data();
+    for (var doc in snapshot) {
+      var data = doc;
       String schoolYear = data['school_year'] ?? 'Nieznany rok';
       String subject = data['subject_name'];
       String gradeValue = data['grade_value'] ?? 'Brak oceny';
@@ -123,7 +127,7 @@ class _GradesPageState extends State<GradesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    return FutureBuilder<List<Map<String, dynamic>>>(
       future: _gradesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -147,7 +151,7 @@ class _GradesPageState extends State<GradesPage> {
           );
         }
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Scaffold(
             appBar: AppBar(
               title: const Text('Oceny Ucznia'),

@@ -77,6 +77,7 @@ class _HomePageStudentState extends State<HomePageStudent> {
                           MaterialPageRoute(
                             builder: (context) => GradesPage(
                               currentUserUid: widget.currentUserUid,
+                              databaseMethods: widget.databaseMethods,
                             ),
                           ),
                         );
@@ -106,6 +107,7 @@ class _HomePageStudentState extends State<HomePageStudent> {
                             builder: (context) => AnnouncementsPage(
                               currentUserRole: 'student',
                               schoolId: widget.schoolId,
+                              databaseMethods: widget.databaseMethods,
                             ),
                           ),
                         );

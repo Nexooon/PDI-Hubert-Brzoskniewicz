@@ -70,6 +70,7 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
                     builder: (context) => AnnouncementsPage(
                       currentUserRole: 'teacher',
                       schoolId: widget.schoolId,
+                      databaseMethods: widget.databaseMethods,
                     ),
                   ),
                 );

@@ -32,8 +32,8 @@ class AnnouncementsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future:
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream:
           databaseMethods.getLatestAnnouncements(schoolId, maxAnnouncements),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

@@ -98,6 +98,7 @@ class _HomePageParentState extends State<HomePageParent> {
                                     MaterialPageRoute(
                                       builder: (context) => GradesPage(
                                         currentUserUid: childId,
+                                        databaseMethods: widget.databaseMethods,
                                       ),
                                     ),
                                   );
@@ -113,6 +114,7 @@ class _HomePageParentState extends State<HomePageParent> {
                                     MaterialPageRoute(
                                       builder: (context) => AttendancePage(
                                         currentUserUid: childId,
+                                        databaseMethods: widget.databaseMethods,
                                       ),
                                     ),
                                   );
@@ -127,13 +129,13 @@ class _HomePageParentState extends State<HomePageParent> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'Ogłoszenia',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                // const Text(
+                //   'Ogłoszenia',
+                //   style: TextStyle(
+                //     fontSize: 24,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                // ),
                 const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text('Najnowsze ogłoszenia',
@@ -153,6 +155,7 @@ class _HomePageParentState extends State<HomePageParent> {
                           builder: (context) => AnnouncementsPage(
                             currentUserRole: 'parent',
                             schoolId: widget.schoolId,
+                            databaseMethods: widget.databaseMethods,
                           ),
                         ),
                       );
