@@ -7,6 +7,7 @@ class TeacherAttendancePage extends StatefulWidget {
   final String subjectId;
   final String subjectName;
   final String year;
+  final DatabaseMethods databaseMethods;
 
   const TeacherAttendancePage({
     super.key,
@@ -15,6 +16,7 @@ class TeacherAttendancePage extends StatefulWidget {
     required this.subjectId,
     required this.subjectName,
     required this.year,
+    required this.databaseMethods,
   });
 
   @override
@@ -34,7 +36,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
   }
 
   void _loadStudentsAttendance() {
-    _studentsAttendanceFuture = DatabaseMethods().getStudentsAttendance(
+    _studentsAttendanceFuture = widget.databaseMethods.getStudentsAttendance(
         widget.schoolId, widget.classId, widget.subjectId);
   }
 
@@ -42,7 +44,7 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
     for (var studentId in editedAttendance.keys) {
       for (var lessonId in editedAttendance[studentId]!.keys) {
         String newStatus = editedAttendance[studentId]![lessonId]!;
-        await DatabaseMethods().updateStudentAttendance(
+        await widget.databaseMethods.updateStudentAttendance(
           widget.schoolId,
           widget.classId,
           widget.subjectId,

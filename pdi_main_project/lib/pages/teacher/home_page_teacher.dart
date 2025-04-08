@@ -86,6 +86,7 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
                   MaterialPageRoute(
                     builder: (context) => SubjectsPage(
                       teacherId: widget.currentUserUid,
+                      databaseMethods: widget.databaseMethods,
                     ),
                   ),
                 );

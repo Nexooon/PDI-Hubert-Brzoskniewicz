@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '424501599220',
     projectId: 'pid-main-project',
     authDomain: 'pid-main-project.firebaseapp.com',
-    storageBucket: 'pid-main-project.appspot.com',
+    storageBucket: 'pid-main-project.firebasestorage.app',
     measurementId: 'G-6F281DN0C1',
   );
 
@@ -61,7 +61,7 @@ class DefaultFirebaseOptions {
     appId: '1:424501599220:android:f7f5e661df4f9c648537a1',
     messagingSenderId: '424501599220',
     projectId: 'pid-main-project',
-    storageBucket: 'pid-main-project.appspot.com',
+    storageBucket: 'pid-main-project.firebasestorage.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
@@ -70,7 +70,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '424501599220',
     projectId: 'pid-main-project',
     authDomain: 'pid-main-project.firebaseapp.com',
-    storageBucket: 'pid-main-project.appspot.com',
+    storageBucket: 'pid-main-project.firebasestorage.app',
     measurementId: 'G-RJVCG8KL8W',
   );
+
 }

@@ -14,14 +14,24 @@ class GradesPage extends StatefulWidget {
 }
 
 class _GradesPageState extends State<GradesPage> {
-  late Future<List<Map<String, dynamic>>> _gradesFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _gradesFuture =
-        widget.databaseMethods.getStudentGrades(widget.currentUserUid);
+  Future<List<Map<String, dynamic>>> _loadGrades() async {
+    try {
+      return await widget.databaseMethods
+          .getStudentGrades(widget.currentUserUid);
+    } catch (e) {
+      return [
+        {'error': e.toString()}
+      ];
+    }
   }
+  // late Future<List<Map<String, dynamic>>> _gradesFuture;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _gradesFuture =
+  //       widget.databaseMethods.getStudentGrades(widget.currentUserUid);
+  // }
 
   String convertDateTime(DateTime dateTime) {
     var date = dateTime;
@@ -70,7 +80,7 @@ class _GradesPageState extends State<GradesPage> {
     for (var doc in snapshot) {
       var data = doc;
       String schoolYear = data['school_year'] ?? 'Nieznany rok';
-      String subject = data['subject_name'];
+      String subject = data['subject_name'] ?? 'Nieznany przedmiot';
       String gradeValue = data['grade_value'] ?? 'Brak oceny';
       String description = data['description'] ?? '';
       Timestamp timestamp = data['date'] ?? Timestamp.now();
@@ -128,7 +138,7 @@ class _GradesPageState extends State<GradesPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _gradesFuture,
+      future: _loadGrades(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -158,6 +168,18 @@ class _GradesPageState extends State<GradesPage> {
               backgroundColor: Colors.blue,
             ),
             body: const Center(child: Text('Brak ocen do wyświetlenia.')),
+          );
+        }
+
+        if (snapshot.data!.isNotEmpty &&
+            snapshot.data!.first.containsKey('error')) {
+          String msg = snapshot.data!.first['error'];
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Oceny Ucznia'),
+              backgroundColor: Colors.blue,
+            ),
+            body: Center(child: Text('Błąd: $msg')),
           );
         }
 

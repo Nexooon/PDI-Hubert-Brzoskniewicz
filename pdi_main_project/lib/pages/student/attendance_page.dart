@@ -14,13 +14,13 @@ class AttendancePage extends StatefulWidget {
 }
 
 class _AttendancePageState extends State<AttendancePage> {
-  late Future<Map<String, dynamic>> _attendanceFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _attendanceFuture =
-        widget.databaseMethods.getStudentAttendance(widget.currentUserUid);
+  Future<Map<String, dynamic>> _loadAttendance() async {
+    try {
+      return await widget.databaseMethods
+          .getStudentAttendance(widget.currentUserUid);
+    } catch (e) {
+      return {'error': e.toString()};
+    }
   }
 
   @override
@@ -28,14 +28,16 @@ class _AttendancePageState extends State<AttendancePage> {
     return Scaffold(
       appBar: AppBar(title: const Text("Frekencja")),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: _attendanceFuture,
+        future: _loadAttendance(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Błąd: ${snapshot.error}"));
+            return const Center(child: Text("Błąd: podczas ładowania danych"));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text("Brak danych o frekwencji"));
+          } else if (snapshot.data!.containsKey("error")) {
+            return Center(child: Text("Błąd: ${snapshot.data!['error']}"));
           }
 
           final attendanceData = snapshot.data!;

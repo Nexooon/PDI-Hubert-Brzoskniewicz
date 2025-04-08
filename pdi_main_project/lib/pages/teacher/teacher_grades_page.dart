@@ -8,14 +8,17 @@ class TeacherGradesPage extends StatefulWidget {
   final String subjectId;
   final String subjectName;
   final String year;
+  final DatabaseMethods databaseMethods;
 
-  const TeacherGradesPage(
-      {super.key,
-      required this.schoolId,
-      required this.classId,
-      required this.subjectId,
-      required this.subjectName,
-      required this.year});
+  const TeacherGradesPage({
+    super.key,
+    required this.schoolId,
+    required this.classId,
+    required this.subjectId,
+    required this.subjectName,
+    required this.year,
+    required this.databaseMethods,
+  });
 
   @override
   State<TeacherGradesPage> createState() => _TeacherGradesPageState();
@@ -39,14 +42,8 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
   }
 
   void _loadGrades() {
-    DocumentReference subjectRef = FirebaseFirestore.instance
-        .collection('schools')
-        .doc(widget.schoolId)
-        .collection('classes')
-        .doc(widget.classId)
-        .collection('subjects')
-        .doc(widget.subjectId);
-    _studentsGradesFuture = DatabaseMethods().getSubjectGrades(subjectRef);
+    _studentsGradesFuture = widget.databaseMethods
+        .getSubjectGrades(widget.schoolId, widget.classId, widget.subjectId);
   }
 
   // final List<Map<String, dynamic>> studentsGrades = [
@@ -157,9 +154,9 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
                     'date': Timestamp.now().toDate(),
                   };
                   if (currentGrade == '-') {
-                    DatabaseMethods().addGrade(gradeInfo);
+                    widget.databaseMethods.addGrade(gradeInfo);
                   } else {
-                    DatabaseMethods().updateGrade(gradeId, gradeInfo);
+                    widget.databaseMethods.updateGrade(gradeId, gradeInfo);
                   }
 
                   setState(() {
@@ -224,7 +221,7 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
                   int newWeight = int.parse(weightController.text);
                   for (var student in studentsGrades) {
                     if (student['grades'].containsKey(gradeType)) {
-                      DatabaseMethods().updateGrade(
+                      widget.databaseMethods.updateGrade(
                           student['grades'][gradeType]['grade_id'], {
                         'weight': newWeight,
                       });

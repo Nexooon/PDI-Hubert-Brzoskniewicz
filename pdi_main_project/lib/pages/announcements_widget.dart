@@ -44,6 +44,12 @@ class AnnouncementsWidget extends StatelessWidget {
           return const Center(child: Text('Brak ogłoszeń'));
         }
 
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Błąd: ${snapshot.error}'),
+          );
+        }
+
         final announcements = snapshot.data!;
 
         return ListView.builder(

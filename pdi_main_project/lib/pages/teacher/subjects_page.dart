@@ -4,10 +4,13 @@ import 'package:pdi_main_project/service/database.dart';
 
 class SubjectsPage extends StatelessWidget {
   final String teacherId;
-  const SubjectsPage({super.key, required this.teacherId});
+  final DatabaseMethods databaseMethods;
 
-  void _navigateToSubject(
-      BuildContext context, String schoolId, String classId, String subjectId) {
+  const SubjectsPage(
+      {super.key, required this.teacherId, required this.databaseMethods});
+
+  void _navigateToSubject(BuildContext context, String schoolId, String classId,
+      String subjectId, String className) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -15,9 +18,20 @@ class SubjectsPage extends StatelessWidget {
           schoolId: schoolId,
           classId: classId,
           subjectId: subjectId,
+          className: className,
+          databaseMethods: databaseMethods,
         ),
       ),
     );
+  }
+
+  Future<Map<String, Map<String, List<Map<String, String>>>>>
+      _getTeacherSubjects() async {
+    try {
+      return await databaseMethods.getTeacherSubjects(teacherId);
+    } catch (e) {
+      throw Exception('Błąd podczas ładowania przedmiotów: $e');
+    }
   }
 
   @override
@@ -27,7 +41,7 @@ class SubjectsPage extends StatelessWidget {
         title: const Text('Przedmioty nauczyciela'),
       ),
       body: FutureBuilder<Map<String, Map<String, List<Map<String, String>>>>>(
-        future: DatabaseMethods().getTeacherSubjects(teacherId),
+        future: _getTeacherSubjects(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -58,6 +72,7 @@ class SubjectsPage extends StatelessWidget {
                             subject['schoolId']!,
                             subject['classId']!,
                             subject['id']!,
+                            className,
                           ),
                         );
                       }).toList(),
