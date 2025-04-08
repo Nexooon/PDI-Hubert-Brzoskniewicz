@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "424501599220",
     "project_id": "pid-main-project",
-    "storage_bucket": "pid-main-project.appspot.com"
+    "storage_bucket": "pid-main-project.firebasestorage.app"
   },
   "client": [
     {
