@@ -2,6 +2,8 @@
 
 ## Instrukcja uruchomienia
 
+Instalację przeprowadzono na systemie Windows 10, wersja 22H2 (kompilacja systemu operacyjnego: 19045.5737)
+
 ### Wersja podstawowa (uruchomienie w przeglądarce)
 
 1. Zainstaluj Fluttera zgodnie z instrukcją: [`https://docs.flutter.dev/get-started/install`](https://docs.flutter.dev/get-started/install)
@@ -21,7 +23,7 @@
 
 ---
 
-### Opcjonalne: uruchomienie na emulatorze
+### Opcjonalnie: uruchomienie na emulatorze (wymaga więcej konfiguracji związanej z instalacją i uruchomieniem emulatora)
 
 1. Wykonaj kroki 1–4 jak wyżej.
 
