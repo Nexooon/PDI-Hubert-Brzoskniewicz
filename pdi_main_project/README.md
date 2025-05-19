@@ -1,6 +1,10 @@
 # PDI Project – Flutter Didactics Support System
 
-## Instrukcja uruchomienia
+## Instrukcja uruchomienia aplikacji
+
+Instalację przeprowadzono na systemie Windows 10, wersja 22H2 (kompilacja systemu operacyjnego: 19045.5737)
+
+Uruchomienie aplikacji w przeglądarce wymaga najmniej konfiguracji, w związku z czym jest to metoda rekomendowana.
 
 ### Wersja podstawowa (uruchomienie w przeglądarce)
 
@@ -21,7 +25,9 @@
 
 ---
 
-### Opcjonalne: uruchomienie na emulatorze
+### Opcjonalnie: uruchomienie na emulatorze
+
+Uwaga! Wymaga to więcej konfiguracji związanej z instalacją i uruchomieniem emulatora
 
 1. Wykonaj kroki 1–4 jak wyżej.
 
