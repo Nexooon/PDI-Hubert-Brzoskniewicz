@@ -15,6 +15,12 @@ class DatabaseMethods {
     return _firestore.collection("users").doc(Auth().currentUser!.uid).get();
   }
 
+  Future<Map<String, dynamic>> getUser(String userId) async {
+    DocumentSnapshot userDoc =
+        await _firestore.collection('users').doc(userId).get();
+    return userDoc.data() as Map<String, dynamic>;
+  }
+
   Future<DocumentSnapshot> getUserDetailsById(String userId) {
     return _firestore.collection("users").doc(userId).get();
   }
@@ -55,6 +61,16 @@ class DatabaseMethods {
     }
 
     return classesData;
+  }
+
+  Future<String> getClassName(String schoolId, String classId) async {
+    DocumentSnapshot classDoc = await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .get();
+    return classDoc['name'];
   }
 
   Future<Map<String, dynamic>> getParentsFromSchoolId(String schoolId) async {
@@ -133,6 +149,7 @@ class DatabaseMethods {
     for (var school in schoolsSnapshot.docs) {
       String schoolName = school['name'];
       String schoolId = school.id;
+      String year = school['current_year'];
       QuerySnapshot classesSnapshot =
           await school.reference.collection('classes').get();
 
@@ -143,6 +160,7 @@ class DatabaseMethods {
             .collection('subjects')
             .where('employee',
                 isEqualTo: _firestore.collection('users').doc(teacherId))
+            .where('year', isEqualTo: year)
             .get();
 
         for (var subject in subjectsSnapshot.docs) {
@@ -168,6 +186,39 @@ class DatabaseMethods {
     }
 
     return teacherData;
+  }
+
+  Future<Map<String, dynamic>> getStudentSubjects(String studentId) async {
+    Map<String, dynamic> studentData = {};
+    DocumentSnapshot studentDoc = await _firestore
+        .collection('users')
+        .doc(studentId)
+        .get(); // Pobierz dokument ucznia na podstawie jego ID
+    DocumentReference schoolRef = studentDoc['school_id'];
+    DocumentReference classRef = studentDoc['class_id'];
+    String year = await schoolRef.get().then((value) => value['current_year']);
+
+    //pobierz aktualne przedmioty
+    QuerySnapshot subjectsSnapshot = await schoolRef
+        .collection('classes')
+        .doc(classRef.id)
+        .collection('subjects')
+        .where('year', isEqualTo: year)
+        .get();
+
+    for (var subject in subjectsSnapshot.docs) {
+      String subjectName = subject['name'];
+      String subjectId = subject.id;
+
+      studentData[subjectName] = {
+        'id': subjectId,
+        'name': subjectName,
+        'schoolId': schoolRef.id,
+        'classId': classRef.id
+      };
+    }
+
+    return studentData;
   }
 
 // LESSON TOPICS
@@ -234,6 +285,32 @@ class DatabaseMethods {
         .collection('subjects')
         .doc(subjectId)
         .get();
+  }
+
+  Future<String> getSubjectName(
+      String schoolId, String classId, String subjectId) async {
+    DocumentSnapshot subjectDoc = await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .get();
+    return subjectDoc['name'];
+  }
+
+  Future<String> getSubjectYear(
+      String schoolId, String classId, String subjectId) async {
+    DocumentSnapshot subjectDoc = await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .get();
+    return subjectDoc['year'];
   }
 
   // ATTENDANCE
@@ -316,6 +393,7 @@ class DatabaseMethods {
     var classRef = student['class_id'];
     var schoolId = schoolRef.id;
     var classId = classRef.id;
+    String year = await schoolRef.get().then((value) => value['current_year']);
 
     // Pobierz listę przedmiotów
     QuerySnapshot<Map<String, dynamic>> subjectsSnapshot = await _firestore
@@ -324,6 +402,7 @@ class DatabaseMethods {
         .collection('classes')
         .doc(classId)
         .collection('subjects')
+        .where('year', isEqualTo: year)
         .get();
 
     // print("subjectsSnapshot: ${subjectsSnapshot.docs}");
@@ -689,6 +768,284 @@ class DatabaseMethods {
 
       return data;
     });
+  }
+
+  // FILES
+
+  Future<List<Map<String, dynamic>>> getSubjectFiles(
+      String schoolId, String classId, String subjectId) async {
+    final querySnapshot = await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .collection('files')
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    return querySnapshot.docs.map((doc) => doc.data()).toList();
+  }
+
+  Future<void> saveFileMetadataToFirestore({
+    required String schoolId,
+    required String classId,
+    required String subjectId,
+    required String fileName,
+    required String downloadUrl,
+  }) async {
+    await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .collection('files')
+        .add({
+      'name': fileName,
+      'url': downloadUrl,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> deleteFileMetadataFromFirestore({
+    required String schoolId,
+    required String classId,
+    required String subjectId,
+    required String fileUrl,
+  }) async {
+    final collection = _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .collection('files');
+
+    final query = await collection.where('url', isEqualTo: fileUrl).get();
+
+    for (var doc in query.docs) {
+      await doc.reference.delete();
+    }
+  }
+
+// ASSIGNMENTS
+  Future<void> addAssignment({
+    required String schoolId,
+    required String classId,
+    required String subjectId,
+    required String title,
+    required String content,
+    required DateTime dueDate,
+  }) async {
+    try {
+      // Generuj nowe ID zadania
+      final assignmentRef = _firestore.collection('assignments').doc();
+      final assignmentId = assignmentRef.id;
+
+      await assignmentRef.set({
+        'school_id': schoolId,
+        'class_id': classId,
+        'subject_id': subjectId,
+        'title': title,
+        'content': content,
+        'due_date': dueDate,
+      });
+
+      // Pobierz uczniów z klasy i dodaj zgłoszenia
+      final students = await getStudentsFromClass(schoolId, classId);
+      for (var studentDoc in students) {
+        await addAssignmentSubmission(
+          assignmentId: assignmentId,
+          studentId: studentDoc.id,
+        );
+      }
+    } catch (e) {
+      throw Exception('Nie udało się dodać zadania: $e');
+    }
+  }
+
+  Future<void> addAssignmentSubmission({
+    required String assignmentId,
+    required String studentId,
+  }) async {
+    try {
+      await _firestore
+          .collection('assignments')
+          .doc(assignmentId)
+          .collection('submissions')
+          .doc(studentId)
+          .set({
+        'status': 'nieprzesłane', // Domyślny status – zadanie nieprzesłane
+      });
+    } catch (e) {
+      throw Exception('Nie udało się dodać zgłoszenia: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getAssignments(
+      String schoolId, String classId, String subjectId) async {
+    Map<String, dynamic> assignmentsData = {};
+
+    QuerySnapshot assignmentsRef = await _firestore
+        .collection('assignments')
+        .where('school_id', isEqualTo: schoolId)
+        .where('class_id', isEqualTo: classId)
+        .where('subject_id', isEqualTo: subjectId)
+        .orderBy('due_date', descending: false)
+        .get();
+
+    for (var assignment in assignmentsRef.docs) {
+      assignmentsData[assignment.id] = assignment['title'];
+    }
+
+    return assignmentsData;
+  }
+
+  Future<Map<String, dynamic>> getTask(String taskId) async {
+    DocumentSnapshot taskDoc =
+        await _firestore.collection('assignments').doc(taskId).get();
+    return taskDoc.data() as Map<String, dynamic>;
+  }
+
+  Future<String> getTaskTitle(String taskId) {
+    return _firestore
+        .collection('assignments')
+        .doc(taskId)
+        .get()
+        .then((value) => value['title']);
+  }
+
+  Future<Timestamp?> getTaskDueDate(String taskId) async {
+    DocumentSnapshot taskDoc =
+        await _firestore.collection('assignments').doc(taskId).get();
+    return taskDoc['due_date'];
+  }
+
+  Future<Map<String, List<Map<String, String>>>> getStudentTasks(
+      String studentId) async {
+    Map<String, List<Map<String, String>>> tasksData = {};
+
+    final subjects = await getStudentSubjects(studentId);
+
+    for (var subject in subjects.entries) {
+      String subjectName = subject.key;
+      List<Map<String, String>> tasksList = [];
+
+      QuerySnapshot assignmentsRef = await _firestore
+          .collection('assignments')
+          .where('subject_id', isEqualTo: subject.value['id'])
+          .get();
+
+      for (var assignment in assignmentsRef.docs) {
+        var assignmentData = assignment.data();
+        tasksList.add({
+          'task_id': assignment.id,
+          'title': assignmentData != null
+              ? (assignmentData as Map<String, dynamic>)['title']
+              : '',
+        });
+      }
+
+      tasksData[subjectName] = tasksList;
+    }
+    return tasksData;
+  }
+
+  Future<List<Map<String, dynamic>>> getStudentsWithTaskStatus(
+    String taskId, {
+    String sortBy = 'name',
+  }) async {
+    // 1. Pobierz wszystkie submissions (każdy dokument ma student_id jako ID)
+    final submissionsSnapshot = await _firestore
+        .collection('assignments')
+        .doc(taskId)
+        .collection('submissions')
+        .get();
+
+    final List<Map<String, dynamic>> result = [];
+
+    for (var submissionDoc in submissionsSnapshot.docs) {
+      final studentId = submissionDoc.id;
+      final status = submissionDoc.data()['status'] ?? 'nieprzesłane';
+
+      // 2. Pobierz dane ucznia z kolekcji users
+      final userDoc = await _firestore.collection('users').doc(studentId).get();
+
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+        result.add({
+          'firstName': userData['name'] ?? '',
+          'lastName': userData['surname'] ?? '',
+          'status': status,
+          'studentId': studentId,
+        });
+      } else {
+        result.add({
+          'firstName': '[nieznany]',
+          'lastName': '[użytkownik]',
+          'status': status,
+          'studentId': studentId,
+        });
+      }
+    }
+
+    if (sortBy == 'name') {
+      result.sort((a, b) =>
+          (a['lastName'] as String).compareTo(b['lastName'] as String));
+    } else if (sortBy == 'status') {
+      const order = {'przesłane': 0, 'nieprzesłane': 1, 'ocenione': 2};
+      result.sort((a, b) =>
+          (order[a['status']] ?? 3).compareTo(order[b['status']] ?? 3));
+    }
+
+    return result;
+  }
+
+  Future<Map<String, dynamic>> getSubmission(
+      String taskId, String studentId) async {
+    final submissionDoc = await _firestore
+        .collection('assignments')
+        .doc(taskId)
+        .collection('submissions')
+        .doc(studentId)
+        .get();
+
+    return submissionDoc.data() ?? {};
+  }
+
+  Future<void> updateSubmission({
+    required String taskId,
+    required String studentId,
+    required String grade,
+    required String comment,
+  }) async {
+    await _firestore
+        .collection('assignments')
+        .doc(taskId)
+        .collection('submissions')
+        .doc(studentId)
+        .update({
+      'grade': grade,
+      'comment': comment,
+      'status': 'ocenione',
+    });
+  }
+
+  Future<void> updateSubmissionStudent({
+    required String taskId,
+    required String studentId,
+    required Map<String, dynamic> submissionData,
+  }) async {
+    await _firestore
+        .collection('assignments')
+        .doc(taskId)
+        .collection('submissions')
+        .doc(studentId)
+        .update(submissionData);
   }
 
   // Future updateEmployeeDetails(

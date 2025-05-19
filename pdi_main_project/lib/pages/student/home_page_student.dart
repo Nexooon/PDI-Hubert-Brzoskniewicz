@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pdi_main_project/pages/announcements_page.dart';
 import 'package:pdi_main_project/pages/announcements_widget.dart';
+import 'package:pdi_main_project/pages/student/attendance_page.dart';
+import 'package:pdi_main_project/pages/student/student_subjects_page.dart';
+import 'package:pdi_main_project/pages/student/tasks_page.dart';
 import 'package:pdi_main_project/service/auth.dart';
 import 'package:pdi_main_project/pages/student/grades_page.dart';
 import 'package:pdi_main_project/service/database.dart';
@@ -94,7 +97,15 @@ class _HomePageStudentState extends State<HomePageStudent> {
                       leading: const Icon(Icons.event_available_outlined),
                       title: const Text('Frekwencja'),
                       onTap: () {
-                        // Przejście do strony z frekwencją
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AttendancePage(
+                              currentUserUid: widget.currentUserUid,
+                              databaseMethods: widget.databaseMethods,
+                            ),
+                          ),
+                        );
                       },
                     ),
                     ListTile(
@@ -111,21 +122,35 @@ class _HomePageStudentState extends State<HomePageStudent> {
                             ),
                           ),
                         );
-                        // Przejście do strony z ogłoszeniami
                       },
                     ),
                     ListTile(
                       leading: const Icon(Icons.task_outlined),
                       title: const Text('Zadania'),
                       onTap: () {
-                        // Przejście do strony z zadaniami
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TasksPage(
+                                studentId: widget.currentUserUid,
+                                databaseMethods: widget.databaseMethods),
+                          ),
+                        );
                       },
                     ),
                     ListTile(
                       leading: const Icon(Icons.menu_book_rounded),
                       title: const Text('Przedmioty'),
                       onTap: () {
-                        // Przejście do strony z przedmiotami
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StudentSubjectsPage(
+                              studentId: widget.currentUserUid,
+                              databaseMethods: widget.databaseMethods,
+                            ),
+                          ),
+                        );
                       },
                     ),
                   ],

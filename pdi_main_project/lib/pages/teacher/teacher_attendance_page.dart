@@ -6,7 +6,6 @@ class TeacherAttendancePage extends StatefulWidget {
   final String classId;
   final String subjectId;
   final String subjectName;
-  final String year;
   final DatabaseMethods databaseMethods;
 
   const TeacherAttendancePage({
@@ -15,7 +14,6 @@ class TeacherAttendancePage extends StatefulWidget {
     required this.classId,
     required this.subjectId,
     required this.subjectName,
-    required this.year,
     required this.databaseMethods,
   });
 

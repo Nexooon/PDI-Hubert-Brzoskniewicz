@@ -9,8 +9,8 @@ class SubjectsPage extends StatelessWidget {
   const SubjectsPage(
       {super.key, required this.teacherId, required this.databaseMethods});
 
-  void _navigateToSubject(BuildContext context, String schoolId, String classId,
-      String subjectId, String className) {
+  void _navigateToSubject(
+      BuildContext context, String schoolId, String classId, String subjectId) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -18,7 +18,8 @@ class SubjectsPage extends StatelessWidget {
           schoolId: schoolId,
           classId: classId,
           subjectId: subjectId,
-          className: className,
+          currentUserRole: 'teacher',
+          currentUserUid: teacherId,
           databaseMethods: databaseMethods,
         ),
       ),
@@ -72,7 +73,6 @@ class SubjectsPage extends StatelessWidget {
                             subject['schoolId']!,
                             subject['classId']!,
                             subject['id']!,
-                            className,
                           ),
                         );
                       }).toList(),
