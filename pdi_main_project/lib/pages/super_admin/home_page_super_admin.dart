@@ -1,10 +1,14 @@
+import 'package:pdi_main_project/pages/super_admin/add_school_admin_page.dart';
+import 'package:pdi_main_project/pages/super_admin/manage_schools_page.dart';
 import 'package:pdi_main_project/service/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:pdi_main_project/service/database.dart';
 
 class HomePageSuperAdmin extends StatefulWidget {
-  const HomePageSuperAdmin({super.key});
+  final DatabaseMethods databaseMethods;
+
+  const HomePageSuperAdmin({super.key, required this.databaseMethods});
 
   @override
   State<HomePageSuperAdmin> createState() => _HomePageSuperAdminState();
@@ -31,7 +35,7 @@ class _HomePageSuperAdminState extends State<HomePageSuperAdmin> {
 
   Future<void> _loadSchools() async {
     try {
-      final data = await DatabaseMethods().getSchools();
+      final data = await widget.databaseMethods.getSchools();
       setState(() {
         schoolsData = data;
       });
@@ -118,81 +122,52 @@ class _HomePageSuperAdminState extends State<HomePageSuperAdmin> {
       appBar: AppBar(
         title: const Text('Super Admin - strona główna'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Imię'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać imię'
-                    : null,
-              ),
-              TextFormField(
-                controller: _surnameController,
-                decoration: const InputDecoration(labelText: 'Nazwisko'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać nazwisko'
-                    : null,
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać email'
-                    : null,
-              ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Hasło'),
-                obscureText: false,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać hasło'
-                    : null,
-              ),
-              const SizedBox(height: 15),
-              schoolsData != null
-                  ? SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      child: DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          labelText: 'Szkoła',
-                          border: OutlineInputBorder(),
+      body: Center(
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddSchoolAdminPage(
+                              databaseMethods: widget.databaseMethods),
                         ),
-                        value: selectedSchool,
-                        items: schoolsData!.keys.map((schoolId) {
-                          return DropdownMenuItem<String>(
-                            value: schoolId,
-                            child: Text(schoolsData![schoolId]),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedSchool = value;
-                          });
-                        },
-                        validator: (value) =>
-                            value == null ? 'Proszę wybrać szkołę' : null,
-                      ),
-                    )
-                  : const CircularProgressIndicator(),
-              _errorMessage(),
-              const SizedBox(height: 10),
-              if (isLoading)
-                const CircularProgressIndicator()
-              else
-                ElevatedButton(
-                  onPressed: () async {
-                    await createSchoolAdmin();
-                  },
-                  child: const Text('Dodaj szkolnego administratora'),
-                ),
-              const SizedBox(height: 20),
-              _signOutButton(),
-            ],
+                      );
+                    },
+                    icon: const Icon(Icons.person_add),
+                    label: const Text('Dodaj administratora szkoły'),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageSchoolsPage(
+                              databaseMethods: widget.databaseMethods),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.school),
+                    label: const Text('Zarządzaj szkołami'),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: signOut,
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Wyloguj'),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

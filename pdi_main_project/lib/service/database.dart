@@ -25,6 +25,13 @@ class DatabaseMethods {
     return _firestore.collection("users").doc(userId).get();
   }
 
+  Future<String> getStudentClass(String studentId) async {
+    DocumentSnapshot studentDoc =
+        await _firestore.collection('users').doc(studentId).get();
+    DocumentReference classRef = studentDoc['class_id'];
+    return classRef.id;
+  }
+
   Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
       getStudentsFromClass(String schoolId, String classId) async {
     QuerySnapshot<Map<String, dynamic>> studentsSnapshot = await _firestore
@@ -1046,6 +1053,352 @@ class DatabaseMethods {
         .collection('submissions')
         .doc(studentId)
         .update(submissionData);
+  }
+
+  // SCHOOL ADMIN
+
+  Future<void> addClassToSchool(String schoolId, String className) async {
+    final classData = {
+      'name': className,
+    };
+
+    await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .add(classData);
+  }
+
+  Future<List<Map<String, dynamic>>> getClassesForSchool(
+      String schoolId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .orderBy('name')
+        .get();
+
+    return snapshot.docs
+        .map((doc) => {
+              'id': doc.id,
+              'name': doc['name'],
+            })
+        .toList();
+  }
+
+  Future<void> updateClassName(
+      String schoolId, String classId, String newName) async {
+    await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .update({'name': newName});
+  }
+
+  Future<void> deleteClass(String schoolId, String classId) async {
+    await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .delete();
+  }
+
+  Future<List<Map<String, dynamic>>> getSubjectsForClass(
+      String schoolId, String classId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .get();
+
+    return snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+  }
+
+  Future<void> addSubject(String schoolId, String classId, String name,
+      String schoolYear, DocumentReference teacherId) async {
+    await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .add({
+      'name': name,
+      'year': schoolYear,
+      'employee': teacherId,
+    });
+  }
+
+  Future<void> updateSubject(String schoolId, String classId, String subjectId,
+      String name, String year, DocumentReference teacherId) async {
+    await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .update({
+      'name': name,
+      'year': year,
+      'employee': teacherId,
+    });
+  }
+
+  Future<void> deleteSubject(
+      String schoolId, String classId, String subjectId) async {
+    await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .delete();
+  }
+
+  Future<List<Map<String, dynamic>>> getTeachers(schoolId) async {
+    DocumentReference schoolRef =
+        _firestore.collection('schools').doc(schoolId);
+
+    final snapshot = await _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'teacher')
+        .where('school_id', isEqualTo: schoolRef)
+        .get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return {
+        'ref': doc.reference,
+        'fullName': '${data['name']} ${data['surname']}',
+      };
+    }).toList();
+  }
+
+  Future<String> getCurrentYear(String schoolId) async {
+    DocumentSnapshot schoolDoc =
+        await _firestore.collection('schools').doc(schoolId).get();
+    return schoolDoc['current_year'];
+  }
+
+  Future<void> updateCurrentYear(String schoolId, String newYear) async {
+    await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .update({'current_year': newYear});
+  }
+
+  //TIMETABLE
+
+  Future<void> addTimetableEntry(
+    String schoolId,
+    String classId,
+    String subjectId,
+    String day,
+    String lessonNumber,
+    String room,
+  ) async {
+    await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .collection('timetable')
+        .add({
+      'day': day,
+      'lesson_number': lessonNumber,
+      'room': room,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getTimetableEntries(
+    String schoolId,
+    String classId,
+    String subjectId,
+  ) async {
+    final snapshot = await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .collection('timetable')
+        .get();
+
+    return snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+  }
+
+  Future<void> deleteTimetableEntry(
+      String schoolId, String classId, String subjectId, String entryId) async {
+    await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId)
+        .collection('timetable')
+        .doc(entryId)
+        .delete();
+  }
+
+  Future<Map<int, Map<String, String>>> getLessonTimes(String schoolId) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('settings')
+        .doc('lessonTimes')
+        .get();
+
+    if (!doc.exists) return {};
+    final data = doc.data()!;
+    return data.map((key, value) =>
+        MapEntry(int.parse(key), Map<String, String>.from(value)));
+  }
+
+  Future<void> updateLessonTimes(
+      String schoolId, Map<int, Map<String, String>> times) async {
+    final converted =
+        times.map((key, value) => MapEntry(key.toString(), value));
+    await FirebaseFirestore.instance
+        .collection('schools')
+        .doc(schoolId)
+        .collection('settings')
+        .doc('lessonTimes')
+        .set(converted);
+  }
+
+  Future<Map<String, dynamic>> getTeacherTimetableMatrix({
+    required String schoolId,
+    required String teacherId,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+    final lessonTimesDoc = await firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('settings')
+        .doc('lessonTimes')
+        .get();
+
+    final lessonTimes = lessonTimesDoc.data() ?? {};
+
+    final daysOfWeek = [
+      'Poniedziałek',
+      'Wtorek',
+      'Środa',
+      'Czwartek',
+      'Piątek'
+    ];
+    final timetableMatrix = <String, Map<String, Map<String, dynamic>>>{};
+
+    for (final day in daysOfWeek) {
+      timetableMatrix[day] = {};
+    }
+
+    final classesSnapshot = await firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .get();
+
+    for (final classDoc in classesSnapshot.docs) {
+      final classId = classDoc.id;
+      final className = classDoc.data()['name'] ?? classId;
+
+      final subjectsSnapshot = await firestore
+          .collection('schools')
+          .doc(schoolId)
+          .collection('classes')
+          .doc(classId)
+          .collection('subjects')
+          .where('employee',
+              isEqualTo: firestore.collection('users').doc(teacherId))
+          .get();
+
+      for (final subjectDoc in subjectsSnapshot.docs) {
+        final subjectId = subjectDoc.id;
+        final subjectName = subjectDoc.data()['name'] ?? 'Przedmiot';
+
+        final timetableSnapshot = await firestore
+            .collection('schools')
+            .doc(schoolId)
+            .collection('classes')
+            .doc(classId)
+            .collection('subjects')
+            .doc(subjectId)
+            .collection('timetable')
+            .get();
+
+        for (final doc in timetableSnapshot.docs) {
+          final data = doc.data();
+          final day = data['day'] ?? '';
+          final lessonNum = data['lesson_number'];
+          final room = data['room'] ?? '';
+
+          if (!daysOfWeek.contains(day)) continue;
+
+          timetableMatrix[day]![lessonNum.toString()] = {
+            'subject': subjectName,
+            'room': room,
+            'className': className,
+          };
+        }
+      }
+    }
+
+    return {
+      'lessonTimes': lessonTimes,
+      'timetableMatrix': timetableMatrix,
+    };
+  }
+
+  // SUPER ADMIN
+
+  Future<Map<String, dynamic>> getSchoolsWithDetails() async {
+    final snapshot = await _firestore.collection('schools').get();
+    return {
+      for (var doc in snapshot.docs) doc.id: doc.data(),
+    };
+  }
+
+  Future<void> addSchool(Map<String, dynamic> data) async {
+    final schoolRef = await _firestore.collection('schools').add(data);
+    final schoolId = schoolRef.id;
+
+    final defaultLessonTimes = {
+      '1': {'start': '08:00', 'end': '08:45'},
+      '2': {'start': '08:55', 'end': '09:40'},
+      '3': {'start': '09:50', 'end': '10:35'},
+      '4': {'start': '10:45', 'end': '11:30'},
+      '5': {'start': '11:40', 'end': '12:25'},
+      '6': {'start': '12:45', 'end': '13:30'},
+      '7': {'start': '13:40', 'end': '14:25'},
+      '8': {'start': '14:35', 'end': '15:20'},
+      '9': {'start': '15:30', 'end': '16:15'},
+    };
+
+    await _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('settings')
+        .doc('lessonTimes')
+        .set(defaultLessonTimes);
+  }
+
+  Future<void> updateSchool(String id, Map<String, dynamic> data) async {
+    await _firestore.collection('schools').doc(id).update(data);
+  }
+
+  Future<void> deleteSchool(String id) async {
+    await _firestore.collection('schools').doc(id).delete();
   }
 
   // Future updateEmployeeDetails(
