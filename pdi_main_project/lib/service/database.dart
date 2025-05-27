@@ -576,6 +576,66 @@ class DatabaseMethods {
     });
   }
 
+  Future<String> getStudentEducator(String studentId) async {
+    DocumentReference classRef =
+        (await _firestore.collection('users').doc(studentId).get())['class_id'];
+    DocumentSnapshot classDoc = await classRef.get();
+    String educatorId = classDoc['educator'];
+
+    return educatorId;
+  }
+
+  Future<void> addExcuse(Map<String, dynamic> excuseInfo) async {
+    String educatorId = await getStudentEducator(excuseInfo['student_id']);
+    excuseInfo['educator_id'] = educatorId;
+
+    return await _firestore.collection("excuses").doc().set(excuseInfo);
+  }
+
+  Future<void> approveExcuse(
+      String excuseId, String studentId, String schoolId) async {
+    final excuseRef = _firestore.collection('excuses').doc(excuseId);
+    final studentRef = _firestore.collection('users').doc(studentId);
+
+    final studentSnap = await studentRef.get();
+    final excuseSnap = await excuseRef.get();
+
+    final classId = studentSnap['class_id'].id;
+    final excuseData = excuseSnap.data()!;
+    final excuseDate = (excuseData['date'] as Timestamp).toDate();
+
+    // Ustaw pole approved w usprawiedliwieniu
+    await excuseRef.update({'approved': true});
+
+    // wszystkie lekcje w klasie ucznia w danym dniu
+    final classSubjectsRef = _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects');
+
+    final subjectsSnapshot = await classSubjectsRef.get();
+
+    for (final subjectDoc in subjectsSnapshot.docs) {
+      final lessonsRef = subjectDoc.reference.collection('lessons');
+      final lessonsSnapshot = await lessonsRef
+          .where('date', isEqualTo: Timestamp.fromDate(excuseDate))
+          .get();
+
+      for (final lessonDoc in lessonsSnapshot.docs) {
+        final attendanceRef = lessonDoc.reference.collection('attendance');
+        final attendanceSnapshot = await attendanceRef
+            .where('student_id', isEqualTo: studentRef.id)
+            .where('status', whereIn: ['Nieobecny', 'Spóźniony']).get();
+
+        for (final attendanceDoc in attendanceSnapshot.docs) {
+          await attendanceDoc.reference.update({'justified': true});
+        }
+      }
+    }
+  }
+
   // GRADES
   DocumentReference getSubjectRefenece(
       String schoolId, String classId, String subjectId) {
@@ -1057,9 +1117,11 @@ class DatabaseMethods {
 
   // SCHOOL ADMIN
 
-  Future<void> addClassToSchool(String schoolId, String className) async {
+  Future<void> addClassToSchool(
+      String schoolId, String className, String educatorId) async {
     final classData = {
       'name': className,
+      'educator': educatorId,
     };
 
     await FirebaseFirestore.instance
@@ -1178,6 +1240,23 @@ class DatabaseMethods {
         'fullName': '${data['name']} ${data['surname']}',
       };
     }).toList();
+  }
+
+  Future<List<DocumentSnapshot>> getTeachersForSchool(String schoolId) async {
+    try {
+      DocumentReference schoolRef =
+          _firestore.collection('schools').doc(schoolId);
+
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('users')
+          .where('school_id', isEqualTo: schoolRef)
+          .where('role', isEqualTo: 'teacher')
+          .get();
+
+      return querySnapshot.docs;
+    } catch (e) {
+      throw Exception('Nie udało się pobrać nauczycieli: $e');
+    }
   }
 
   Future<String> getCurrentYear(String schoolId) async {

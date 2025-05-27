@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:pdi_main_project/pages/school_admin/subjects_page_sa.dart';
 import 'package:pdi_main_project/service/database.dart';
@@ -32,37 +33,82 @@ class _ManageClassesPageSaState extends State<ManageClassesPageSa> {
     });
   }
 
-  void _showAddClassDialog() {
+  void _showAddClassDialog() async {
     final TextEditingController controller = TextEditingController();
+    List<DocumentSnapshot> teachers = [];
+
+    try {
+      teachers =
+          await widget.databaseMethods.getTeachersForSchool(widget.schoolId);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Błąd pobierania nauczycieli: $e')),
+      );
+      return;
+    }
+
+    String? selectedTeacherId;
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Dodaj klasę'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Nazwa klasy (np. 2B)',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Anuluj'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final className = controller.text.trim();
-              if (className.isNotEmpty) {
-                await widget.databaseMethods
-                    .addClassToSchool(widget.schoolId, className);
-                Navigator.pop(context);
-                _loadClasses();
-              }
-            },
-            child: const Text('Dodaj'),
-          ),
-        ],
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Dodaj klasę'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(
+                    labelText: 'Nazwa klasy (np. 2B)',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedTeacherId,
+                  items: teachers.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    return DropdownMenuItem<String>(
+                      value: doc.id,
+                      child: Text('${data['name']} ${data['surname']}'),
+                    );
+                  }).toList(),
+                  onChanged: (value) =>
+                      setState(() => selectedTeacherId = value),
+                  decoration: const InputDecoration(
+                    labelText: 'Wychowawca klasy',
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Anuluj'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final className = controller.text.trim();
+                  if (className.isNotEmpty && selectedTeacherId != null) {
+                    await widget.databaseMethods.addClassToSchool(
+                      widget.schoolId,
+                      className,
+                      selectedTeacherId!,
+                    );
+                    Navigator.pop(context);
+                    _loadClasses();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Uzupełnij wszystkie pola')),
+                    );
+                  }
+                },
+                child: const Text('Dodaj'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

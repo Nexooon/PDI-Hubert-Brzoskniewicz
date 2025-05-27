@@ -4,10 +4,14 @@ import 'package:pdi_main_project/service/database.dart';
 
 class AttendancePage extends StatefulWidget {
   final String currentUserUid;
+  final String userRole;
   final DatabaseMethods databaseMethods;
 
   const AttendancePage(
-      {super.key, required this.currentUserUid, required this.databaseMethods});
+      {super.key,
+      required this.currentUserUid,
+      required this.userRole,
+      required this.databaseMethods});
 
   @override
   State<AttendancePage> createState() => _AttendancePageState();
@@ -21,6 +25,82 @@ class _AttendancePageState extends State<AttendancePage> {
     } catch (e) {
       return {'error': e.toString()};
     }
+  }
+
+  void _showExcuseDialog(BuildContext context) {
+    final reasonController = TextEditingController();
+    DateTime? selectedDate;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Usprawiedliwienie nieobecności'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton.icon(
+                    onPressed: () async {
+                      final pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
+                      );
+                      if (pickedDate != null) {
+                        setState(() => selectedDate = pickedDate);
+                      }
+                    },
+                    icon: const Icon(Icons.calendar_today),
+                    label: Text(selectedDate == null
+                        ? 'Wybierz datę'
+                        : "${selectedDate!.day}.${selectedDate!.month}.${selectedDate!.year}"),
+                  ),
+                  TextField(
+                    controller: reasonController,
+                    decoration: const InputDecoration(labelText: 'Powód'),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Anuluj'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (selectedDate != null &&
+                        reasonController.text.trim().isNotEmpty) {
+                      await widget.databaseMethods.addExcuse({
+                        'student_id': widget.currentUserUid,
+                        'date': Timestamp.fromDate(selectedDate!),
+                        'reason': reasonController.text.trim(),
+                        'approved': false,
+                      });
+
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Usprawiedliwienie wysłane')),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Uzupełnij wszystkie pola')),
+                      );
+                    }
+                  },
+                  child: const Text('Wyślij'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -54,46 +134,16 @@ class _AttendancePageState extends State<AttendancePage> {
           );
         },
       ),
+      floatingActionButton: widget.userRole == 'parent'
+          ? FloatingActionButton(
+              onPressed: () => _showExcuseDialog(context),
+              tooltip: 'Wyślij usprawiedliwienie',
+              child: const Icon(Icons.note_add),
+            )
+          : null,
     );
   }
 }
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text("Frekencja")),
-//       body: FutureBuilder<Map<String, dynamic>>(
-//         future: _attendanceFuture,
-//         builder: (context, snapshot) {
-//           // Logowanie do debugowania
-//           print(
-//               "FutureBuilder snapshot: ${snapshot.connectionState}, error: ${snapshot.error}");
-
-//           if (snapshot.connectionState == ConnectionState.waiting) {
-//             return const Center(child: CircularProgressIndicator());
-//           } else if (snapshot.hasError) {
-//             return Center(child: Text("Błąd: ${snapshot.error}"));
-//           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-//             return const Center(child: Text("Brak danych o frekwencji"));
-//           }
-
-//           final attendanceData = snapshot.data!;
-//           print(attendanceData);
-//           return ListView(
-//             padding: const EdgeInsets.all(8.0),
-//             children: [
-//               if (attendanceData['Spóźniony'].isNotEmpty)
-//                 AttendanceSection(
-//                     title: "Spóźnienia", data: attendanceData['Spóźniony']),
-//               if (attendanceData['Nieobecny'].isNotEmpty)
-//                 AttendanceSection(
-//                     title: "Nieobecności", data: attendanceData['Nieobecny']),
-//             ],
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
 
 class AttendanceSection extends StatelessWidget {
   final String title;
@@ -158,8 +208,7 @@ class AttendanceDateGroup extends StatelessWidget {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("$subject (${lesson['time']})",
-                      style: const TextStyle(fontSize: 14)),
+                  Text("$subject", style: const TextStyle(fontSize: 14)),
                   Icon(
                     lesson['justified'] ? Icons.check_circle : Icons.cancel,
                     color: lesson['justified'] ? Colors.green : Colors.red,

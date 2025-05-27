@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pdi_main_project/pages/announcements_page.dart';
 import 'package:pdi_main_project/pages/announcements_widget.dart';
+import 'package:pdi_main_project/pages/teacher/excuses_page.dart';
 import 'package:pdi_main_project/pages/teacher/subjects_page.dart';
 import 'package:pdi_main_project/pages/teacher/teacher_timetable_page.dart';
 import 'package:pdi_main_project/service/auth.dart';
@@ -106,6 +107,23 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
                   MaterialPageRoute(
                     builder: (context) => SubjectsPage(
                       teacherId: widget.currentUserUid,
+                      databaseMethods: widget.databaseMethods,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.check_circle_outline),
+              title: const Text('Usprawiedliwienia'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ExcusesPage(
+                      teacherId: widget.currentUserUid,
+                      schoolId: widget.schoolId,
                       databaseMethods: widget.databaseMethods,
                     ),
                   ),

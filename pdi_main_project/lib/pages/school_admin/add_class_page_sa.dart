@@ -27,7 +27,7 @@ class _AddClassPageSaState extends State<AddClassPageSa> {
     }
 
     try {
-      await widget.databaseMethods.addClassToSchool(widget.schoolId, className);
+      // await widget.databaseMethods.addClassToSchool(widget.schoolId, className);
       Navigator.pop(context); // wróć do strony głównej po dodaniu
     } catch (e) {
       setState(() => error = 'Błąd przy dodawaniu klasy: $e');

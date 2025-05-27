@@ -108,12 +108,12 @@ class _HomePageParentState extends State<HomePageParent> {
                               const SizedBox(width: 10),
                               ElevatedButton(
                                 onPressed: () {
-                                  // Nawigacja do strony z frekwencją
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => AttendancePage(
                                         currentUserUid: childId,
+                                        userRole: 'parent',
                                         databaseMethods: widget.databaseMethods,
                                       ),
                                     ),

@@ -113,6 +113,7 @@ class _HomePageStudentState extends State<HomePageStudent> {
                           MaterialPageRoute(
                             builder: (context) => AttendancePage(
                               currentUserUid: widget.currentUserUid,
+                              userRole: 'student',
                               databaseMethods: widget.databaseMethods,
                             ),
                           ),
