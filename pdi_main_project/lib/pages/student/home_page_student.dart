@@ -4,6 +4,8 @@ import 'package:pdi_main_project/pages/announcements_widget.dart';
 import 'package:pdi_main_project/pages/student/attendance_page.dart';
 import 'package:pdi_main_project/pages/student/student_subjects_page.dart';
 import 'package:pdi_main_project/pages/student/tasks_page.dart';
+import 'package:pdi_main_project/pages/student/timetable_page.dart';
+import 'package:pdi_main_project/pages/student/today_lessons_widget.dart';
 import 'package:pdi_main_project/service/auth.dart';
 import 'package:pdi_main_project/pages/student/grades_page.dart';
 import 'package:pdi_main_project/service/database.dart';
@@ -90,7 +92,16 @@ class _HomePageStudentState extends State<HomePageStudent> {
                       leading: const Icon(Icons.calendar_month_outlined),
                       title: const Text('Plan zajęć'),
                       onTap: () {
-                        // Przejście do strony z planem zajęć
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TimetablePage(
+                              schoolId: widget.schoolId,
+                              studentId: widget.currentUserUid,
+                              databaseMethods: widget.databaseMethods,
+                            ),
+                          ),
+                        );
                       },
                     ),
                     ListTile(
@@ -186,16 +197,12 @@ class _HomePageStudentState extends State<HomePageStudent> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            // Tutaj będzie widget pokazujący dzisiejszy plan zajęć
-            const SizedBox(height: 20),
-            const Text(
-              'Ostatnie oceny',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            TodayLessonsWidget(
+              schoolId: widget.schoolId,
+              studentId: widget.currentUserUid,
+              databaseMethods: DatabaseMethods(),
             ),
-            // Tutaj będzie widget pokazujący ostatnie oceny
+            const SizedBox(height: 10),
             const Padding(
               padding: EdgeInsets.all(8.0),
               child:

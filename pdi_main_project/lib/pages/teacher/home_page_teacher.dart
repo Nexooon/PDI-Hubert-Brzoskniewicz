@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pdi_main_project/pages/announcements_page.dart';
 import 'package:pdi_main_project/pages/announcements_widget.dart';
 import 'package:pdi_main_project/pages/teacher/subjects_page.dart';
+import 'package:pdi_main_project/pages/teacher/teacher_timetable_page.dart';
 import 'package:pdi_main_project/service/auth.dart';
 import 'package:pdi_main_project/service/database.dart';
 
@@ -23,6 +24,15 @@ class HomePageTeacher extends StatefulWidget {
 class _HomePageTeacherState extends State<HomePageTeacher> {
   Future<void> signOut() async {
     await Auth().signOut();
+  }
+
+  Future<Map<String, dynamic>> _loadTodayTimetable() async {
+    final data = await widget.databaseMethods.getTeacherTimetableMatrix(
+      schoolId: widget.schoolId,
+      teacherId: widget.currentUserUid,
+    );
+
+    return data;
   }
 
   @override
@@ -56,7 +66,17 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
               leading: const Icon(Icons.calendar_month_outlined),
               title: const Text('Plan zajęć'),
               onTap: () {
-                // Przejście do strony z planem zajęć
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TeacherTimetablePage(
+                      teacherId: widget.currentUserUid,
+                      schoolId: widget.schoolId,
+                      databaseMethods: widget.databaseMethods,
+                    ),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -127,7 +147,72 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            // Tutaj będzie widget pokazujący dzisiejszy plan zajęć
+            FutureBuilder<Map<String, dynamic>>(
+              future: _loadTodayTimetable(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData) {
+                  return const Text('Brak danych planu.');
+                }
+
+                final lessonTimes =
+                    snapshot.data!['lessonTimes'] as Map<String, dynamic>;
+                final timetableMatrix = snapshot.data!['timetableMatrix']
+                    as Map<String, Map<String, Map<String, dynamic>>>;
+
+                final weekday = DateTime.now().weekday;
+                final daysOfWeek = [
+                  'Poniedziałek',
+                  'Wtorek',
+                  'Środa',
+                  'Czwartek',
+                  'Piątek'
+                ];
+                if (weekday < 1 || weekday > 5) {
+                  return const Text('Dziś nie ma lekcji (weekend).');
+                }
+
+                final today = daysOfWeek[weekday - 1];
+                // final today = "Poniedziałek";
+                final todayPlan = timetableMatrix[today]!;
+
+                if (todayPlan.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12.0),
+                    child: Text(
+                      'Brak zaplanowanych lekcji na dziś.',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  );
+                }
+
+                final sortedLessons = todayPlan.entries.toList()
+                  ..sort(
+                      (a, b) => int.parse(a.key).compareTo(int.parse(b.key)));
+
+                return Column(
+                  children: sortedLessons.map((entry) {
+                    final lessonNum = entry.key;
+                    final data = entry.value;
+                    final time = lessonTimes[lessonNum];
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        title: Text(
+                            '${data['subject']} (${data['room']}) - kl. ${data['className']}'),
+                        subtitle: Text(
+                          'Lekcja $lessonNum: ${time['start']} - ${time['end']}',
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
             const SizedBox(height: 20),
             const Padding(
               padding: EdgeInsets.all(8.0),
