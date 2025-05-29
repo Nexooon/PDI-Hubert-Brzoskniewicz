@@ -165,7 +165,7 @@ class _TaskPageStudentState extends State<TaskPageStudent> {
                     const SizedBox(height: 6),
                     Text(taskData!['content'] ?? 'Brak treści'),
                     const SizedBox(
-                      width: 280,
+                      width: 330,
                     ),
                   ],
                 ),
@@ -196,9 +196,9 @@ class _TaskPageStudentState extends State<TaskPageStudent> {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(submissionData!['comment'] ?? 'Brak komentarza',
-                        style: Theme.of(context).textTheme.titleMedium),
+                        style: Theme.of(context).textTheme.bodyLarge),
                     const SizedBox(
-                      width: 240,
+                      width: 330,
                     ),
                   ],
                 ),

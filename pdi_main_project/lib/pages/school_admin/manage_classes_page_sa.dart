@@ -219,6 +219,8 @@ class _ManageClassesPageSaState extends State<ManageClassesPageSa> {
                       icon: const Icon(Icons.delete),
                       onPressed: () => _confirmDelete(classData['id']),
                     ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.arrow_forward_rounded, size: 30),
                   ],
                 ),
               );

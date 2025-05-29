@@ -38,7 +38,10 @@ class _HomePageParentState extends State<HomePageParent> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rodzic - strona główna'),
+        title: const Text(
+          'Strona główna rodzica',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.blue,
         actions: [
           TextButton.icon(
@@ -160,7 +163,7 @@ class _HomePageParentState extends State<HomePageParent> {
                         ),
                       );
                     },
-                    child: const Text('Ogłoszenia'))
+                    child: const Text('Strona ogłoszeń')),
               ],
             ),
           );

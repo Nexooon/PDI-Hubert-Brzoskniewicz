@@ -16,6 +16,7 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
   String? errorMessage;
   String? schoolId;
   String currentYear = '';
+  String? schoolName;
   Map<int, Map<String, String>> lessonTimes = {};
   bool isLoading = true;
 
@@ -30,9 +31,11 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
       final id = await widget.databaseMethods.getSchoolId();
       final year = await widget.databaseMethods.getCurrentYear(id);
       final times = await widget.databaseMethods.getLessonTimes(id);
+      final name = await widget.databaseMethods.getSchoolName(id);
       setState(() {
         schoolId = id;
         currentYear = year;
+        schoolName = name;
         lessonTimes = times;
         isLoading = false;
       });
@@ -181,10 +184,27 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
     await Auth().signOut();
   }
 
-  Widget _signOutButton() {
-    return ElevatedButton(
-      onPressed: signOut,
-      child: const Text('Wyloguj'),
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback? onPressed,
+    Color color = Colors.blue,
+  }) {
+    return SizedBox(
+      width: 200,
+      height: 50,
+      child: ElevatedButton.icon(
+        icon: Icon(icon, size: 20),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: onPressed == null ? Colors.grey : color,
+          foregroundColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: const TextStyle(fontSize: 16),
+        ),
+        onPressed: onPressed,
+      ),
     );
   }
 
@@ -198,7 +218,7 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
 
     if (errorMessage != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('School Admin - strona główna')),
+        appBar: AppBar(title: const Text('Panel administratora szkoły')),
         body: Center(
           child: Text(errorMessage!),
         ),
@@ -206,61 +226,104 @@ class _HomePageSchoolAdminState extends State<HomePageSchoolAdmin> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('School Admin - strona główna')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Witaj, Adminie Szkoły!'),
-            const SizedBox(height: 20),
-            Text('Aktualny rok szkolny: $currentYear'),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _changeCurrentYear,
-              child: const Text('Zmień rok szkolny'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: schoolId == null
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddUserPageSa(
-                            databaseMethods: widget.databaseMethods,
-                            schoolId: schoolId!,
-                          ),
+      appBar: AppBar(
+        title: const Text('Panel administratora szkoły'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Center(
+          child: Column(
+            children: [
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Witaj, Adminie Szkoły!',
+                        style: TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
+                      if (schoolName != null)
+                        Text(
+                          'Szkoła: $schoolName',
+                          style: const TextStyle(fontSize: 16),
                         ),
-                      );
-                    },
-              child: const Text('Dodaj użytkownika'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: schoolId == null
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ManageClassesPageSa(
-                            databaseMethods: widget.databaseMethods,
-                            schoolId: schoolId!,
-                          ),
-                        ),
-                      );
-                    },
-              child: const Text('Zarządzaj klasami'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: schoolId == null ? null : _showEditLessonTimesDialog,
-              child: const Text('Modyfikuj godziny zajęć'),
-            ),
-            const SizedBox(height: 20),
-            _signOutButton(),
-          ],
+                      const SizedBox(height: 12),
+                      Text(
+                        'Aktualny rok szkolny: $currentYear',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: _changeCurrentYear,
+                        icon: const Icon(Icons.edit_calendar),
+                        label: const Text('Zmień rok szkolny'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                alignment: WrapAlignment.center,
+                children: [
+                  _buildActionButton(
+                    label: 'Dodaj użytkownika',
+                    icon: Icons.person_add,
+                    onPressed: schoolId == null
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddUserPageSa(
+                                  databaseMethods: widget.databaseMethods,
+                                  schoolId: schoolId!,
+                                ),
+                              ),
+                            );
+                          },
+                  ),
+                  _buildActionButton(
+                    label: 'Zarządzaj klasami',
+                    icon: Icons.class_,
+                    onPressed: schoolId == null
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ManageClassesPageSa(
+                                  databaseMethods: widget.databaseMethods,
+                                  schoolId: schoolId!,
+                                ),
+                              ),
+                            );
+                          },
+                  ),
+                  _buildActionButton(
+                    label: 'Godziny zajęć',
+                    icon: Icons.schedule,
+                    onPressed:
+                        schoolId == null ? null : _showEditLessonTimesDialog,
+                  ),
+                  _buildActionButton(
+                    label: 'Wyloguj',
+                    icon: Icons.logout,
+                    onPressed: signOut,
+                    color: Colors.red,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
