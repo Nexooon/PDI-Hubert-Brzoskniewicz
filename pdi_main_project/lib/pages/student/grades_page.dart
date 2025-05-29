@@ -42,8 +42,8 @@ class _GradesPageState extends State<GradesPage> {
     return '${date.day}.${date.month}.${date.year} ${date.hour}:$minute';
   }
 
-  void _showGradeDetails(
-      BuildContext context, String grade, String description, DateTime date) {
+  void _showGradeDetails(BuildContext context, String grade, String description,
+      String comment, DateTime date) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -55,6 +55,8 @@ class _GradesPageState extends State<GradesPage> {
               Text('Ocena: $grade'),
               const SizedBox(height: 10),
               Text('Opis: $description'),
+              const SizedBox(height: 10),
+              Text('Komentarz: $comment'),
               const SizedBox(height: 10),
               Text('Data: ${convertDateTime(date.toLocal())}'),
             ],
@@ -83,6 +85,7 @@ class _GradesPageState extends State<GradesPage> {
       String subject = data['subject_name'] ?? 'Nieznany przedmiot';
       String gradeValue = data['grade_value'] ?? 'Brak oceny';
       String description = data['description'] ?? '';
+      String comment = data['comment'] ?? '';
       Timestamp timestamp = data['date'] ?? Timestamp.now();
       bool isFinal = data['is_final'] ?? false;
 
@@ -109,12 +112,14 @@ class _GradesPageState extends State<GradesPage> {
         subjectEntry['finalGrade'] = {
           'grade': gradeValue,
           'description': description,
+          'comment': comment,
           'date': timestamp.toDate(),
         };
       } else {
         subjectEntry['partialGrades'].add({
           'grade': gradeValue,
           'description': description,
+          'comment': comment,
           'date': timestamp.toDate(),
         });
       }
@@ -233,6 +238,7 @@ class _GradesPageState extends State<GradesPage> {
                                     context,
                                     gradeData['grade'],
                                     gradeData['description'],
+                                    gradeData['comment'],
                                     gradeData['date'],
                                   ),
                                   child: Container(
@@ -264,12 +270,13 @@ class _GradesPageState extends State<GradesPage> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => _showGradeDetails(
-                                context,
-                                subjectData['finalGrade']['grade'],
-                                subjectData['finalGrade']['description'],
-                                subjectData['finalGrade']['date'],
-                              ),
+                              // onTap: () => _showGradeDetails(
+                              //   context,
+                              //   subjectData['finalGrade']['grade'],
+                              //   subjectData['finalGrade']['description'],
+                              //   subjectData['finalGrade']['comment'],
+                              //   subjectData['finalGrade']['date'],
+                              // ),
                               child: Container(
                                 margin: const EdgeInsets.symmetric(vertical: 5),
                                 padding: const EdgeInsets.all(10),

@@ -651,7 +651,7 @@ class _SubjectPageState extends State<SubjectPage> {
                   schoolId: widget.schoolId,
                   classId: widget.classId,
                   subjectId: widget.subjectId,
-                  subjectName: className,
+                  subjectName: subjectName,
                   year: year,
                   databaseMethods: widget.databaseMethods,
                 ),

@@ -55,6 +55,12 @@ class DatabaseMethods {
     return schoolRef.id;
   }
 
+  Future<String> getSchoolName(String schoolId) async {
+    DocumentSnapshot schoolDoc =
+        await _firestore.collection('schools').doc(schoolId).get();
+    return schoolDoc['name'];
+  }
+
   Future<Map<String, dynamic>> getClassIdsFromSchoolId(String schoolId) async {
     QuerySnapshot<Map<String, dynamic>> classesSnapshot = await _firestore
         .collection('schools')
@@ -688,6 +694,7 @@ class DatabaseMethods {
       studentGradesMap[studentId]!['grades'][gradeType] = {
         'value': gradeData['grade_value'],
         'weight': gradeData['weight'],
+        'comment': gradeData['comment'],
         'grade_id': gradeDoc.id,
       };
     }
@@ -696,6 +703,66 @@ class DatabaseMethods {
     studentsGrades = studentGradesMap.values.toList();
 
     return studentsGrades;
+  }
+
+  Future<List<Map<String, dynamic>>> getStudentsWithFinalGrades(
+    String schoolId,
+    String classId,
+    String subjectId,
+    String schoolYear,
+  ) async {
+    final studentsSnapshot = await _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'student')
+        .where(
+          'class_id',
+          isEqualTo: _firestore
+              .collection('schools')
+              .doc(schoolId)
+              .collection('classes')
+              .doc(classId),
+        )
+        .get();
+
+    final gradesSnapshot = await _firestore
+        .collection('grades')
+        .where(
+          'subject_id',
+          isEqualTo: _firestore
+              .collection('schools')
+              .doc(schoolId)
+              .collection('classes')
+              .doc(classId)
+              .collection('subjects')
+              .doc(subjectId),
+        )
+        .where('school_year', isEqualTo: schoolYear)
+        .where('is_final', isEqualTo: true)
+        .get();
+
+    // Mapujemy studentId → {grade_value, grade_id}
+    final gradesMap = {
+      for (var doc in gradesSnapshot.docs)
+        (doc['student_id'] as DocumentReference).id: {
+          'grade_value': doc['grade_value'] as String,
+          'grade_id': doc.id,
+        }
+    };
+
+    final result = <Map<String, dynamic>>[];
+    for (var studentDoc in studentsSnapshot.docs) {
+      final studentId = studentDoc.id;
+      final gradeInfo = gradesMap[studentId];
+
+      result.add({
+        'student_id': studentDoc.reference,
+        'name': '${studentDoc['name']} ${studentDoc['surname']}',
+        'final_grade': gradeInfo?['grade_value'],
+        'final_grade_id': gradeInfo?['grade_id'],
+      });
+    }
+
+    return result;
   }
 
   Future<void> addGrade(Map<String, dynamic> gradeInfo) async {
