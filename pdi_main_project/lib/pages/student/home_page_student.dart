@@ -201,7 +201,7 @@ class _HomePageStudentState extends State<HomePageStudent> {
             TodayLessonsWidget(
               schoolId: widget.schoolId,
               studentId: widget.currentUserUid,
-              databaseMethods: DatabaseMethods(),
+              databaseMethods: widget.databaseMethods,
             ),
             const SizedBox(height: 10),
             const Padding(

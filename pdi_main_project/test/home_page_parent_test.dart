@@ -206,7 +206,7 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Ogłoszenia'));
+    await tester.tap(find.text('Strona ogłoszeń'));
     await tester.pumpAndSettle();
     expect(find.byType(AnnouncementsPage), findsOneWidget);
 
