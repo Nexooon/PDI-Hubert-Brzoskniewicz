@@ -139,32 +139,38 @@ class _FinalGradesPageState extends State<FinalGradesPage> {
             }
           }
 
-          return ListView.builder(
-            itemCount: students.length,
-            itemBuilder: (context, index) {
-              final student = students[index];
-              final studentId = (student['student_id'] as DocumentReference).id;
-              final studentName = student['name'] as String;
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 700),
+              child: ListView.builder(
+                itemCount: students.length,
+                itemBuilder: (context, index) {
+                  final student = students[index];
+                  final studentId =
+                      (student['student_id'] as DocumentReference).id;
+                  final studentName = student['name'] as String;
 
-              return ListTile(
-                title: Text(studentName),
-                trailing: DropdownButton<String>(
-                  hint: const Text('Wybierz'),
-                  value: _finalGrades[studentId],
-                  items: _gradeOptions.map((grade) {
-                    return DropdownMenuItem(
-                      value: grade,
-                      child: Text(grade),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _finalGrades[studentId] = value;
-                    });
-                  },
-                ),
-              );
-            },
+                  return ListTile(
+                    title: Text(studentName),
+                    trailing: DropdownButton<String>(
+                      hint: const Text('Wybierz'),
+                      value: _finalGrades[studentId],
+                      items: _gradeOptions.map((grade) {
+                        return DropdownMenuItem(
+                          value: grade,
+                          child: Text(grade),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _finalGrades[studentId] = value;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
           );
         },
       ),

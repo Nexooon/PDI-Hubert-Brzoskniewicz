@@ -118,70 +118,75 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
 
           final announcements = snapshot.data!;
 
-          return ListView.builder(
-            itemCount: announcements.length,
-            itemBuilder: (context, index) {
-              final announcement = announcements[index];
-              final announcementId = announcement['id'];
-              final title = announcement['title'];
-              final content = announcement['content'];
-              final isExpanded = _expandedState[index] ?? false;
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: ListView.builder(
+                itemCount: announcements.length,
+                itemBuilder: (context, index) {
+                  final announcement = announcements[index];
+                  final announcementId = announcement['id'];
+                  final title = announcement['title'];
+                  final content = announcement['content'];
+                  final isExpanded = _expandedState[index] ?? false;
 
-              return Card(
-                margin: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListTile(
-                      title: Text(title),
-                      subtitle: Text(
-                        isExpanded
-                            ? content!
-                            : (content!.length > 100
-                                ? '${content!.substring(0, 100)}...'
-                                : content!),
-                      ),
-                      trailing: isTeacher
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: Colors.blue),
-                                  onPressed: () => _showEditDialog(
-                                    announcementId: announcementId,
-                                    currentTitle: title,
-                                    currentContent: content,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.red),
-                                  onPressed: () async {
-                                    await _databaseMethods
-                                        .deleteAnnouncement(announcementId);
-                                  },
-                                ),
-                              ],
-                            )
-                          : null,
-                    ),
-                    if (content!.length > 100)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _expandedState[index] = !isExpanded;
-                            });
-                          },
-                          child: Text(isExpanded ? 'Zwiń' : 'Więcej...'),
+                  return Card(
+                    margin: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ListTile(
+                          title: Text(title),
+                          subtitle: Text(
+                            isExpanded
+                                ? content!
+                                : (content!.length > 100
+                                    ? '${content!.substring(0, 100)}...'
+                                    : content!),
+                          ),
+                          trailing: isTeacher
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          color: Colors.blue),
+                                      onPressed: () => _showEditDialog(
+                                        announcementId: announcementId,
+                                        currentTitle: title,
+                                        currentContent: content,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () async {
+                                        await _databaseMethods
+                                            .deleteAnnouncement(announcementId);
+                                      },
+                                    ),
+                                  ],
+                                )
+                              : null,
                         ),
-                      ),
-                  ],
-                ),
-              );
-            },
+                        if (content!.length > 100)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _expandedState[index] = !isExpanded;
+                                });
+                              },
+                              child: Text(isExpanded ? 'Zwiń' : 'Więcej...'),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
           );
         },
       ),

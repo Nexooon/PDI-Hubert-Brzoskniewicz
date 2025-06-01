@@ -188,43 +188,48 @@ class _ManageClassesPageSaState extends State<ManageClassesPageSa> {
           }
 
           final classes = snapshot.data!;
-          return ListView.builder(
-            itemCount: classes.length,
-            itemBuilder: (context, index) {
-              final classData = classes[index];
-              return ListTile(
-                title: Text(classData['name']),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => SubjectsPageSa(
-                        databaseMethods: widget.databaseMethods,
-                        schoolId: widget.schoolId,
-                        classId: classData['id'],
-                        className: classData['name'],
-                      ),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: ListView.builder(
+                itemCount: classes.length,
+                itemBuilder: (context, index) {
+                  final classData = classes[index];
+                  return ListTile(
+                    title: Text(classData['name']),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SubjectsPageSa(
+                            databaseMethods: widget.databaseMethods,
+                            schoolId: widget.schoolId,
+                            classId: classData['id'],
+                            className: classData['name'],
+                          ),
+                        ),
+                      );
+                    },
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => _showEditDialog(
+                              classData['id'], classData['name']),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () => _confirmDelete(classData['id']),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded, size: 30),
+                      ],
                     ),
                   );
                 },
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () =>
-                          _showEditDialog(classData['id'], classData['name']),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => _confirmDelete(classData['id']),
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_forward_rounded, size: 30),
-                  ],
-                ),
-              );
-            },
+              ),
+            ),
           );
         },
       ),

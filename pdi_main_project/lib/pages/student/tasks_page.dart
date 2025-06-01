@@ -62,25 +62,31 @@ class TasksPage extends StatelessWidget {
               return const Center(child: Text('Brak zadań do wyświetlenia'));
             }
 
-            return ListView.builder(
-              itemCount: filteredTasksData.length,
-              itemBuilder: (context, index) {
-                String subjectName = filteredTasksData.keys.elementAt(index);
-                List<Map<String, String>> tasks =
-                    filteredTasksData[subjectName]!;
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: ListView.builder(
+                  itemCount: filteredTasksData.length,
+                  itemBuilder: (context, index) {
+                    String subjectName =
+                        filteredTasksData.keys.elementAt(index);
+                    List<Map<String, String>> tasks =
+                        filteredTasksData[subjectName]!;
 
-                return ExpansionTile(
-                  title: Text(subjectName),
-                  children: tasks.map((task) {
-                    String taskId = task['task_id'] ?? '';
-                    String taskTitle = task['title'] ?? '';
-                    return ListTile(
-                      title: Text(taskTitle),
-                      onTap: () => _navigateToTask(context, taskId),
+                    return ExpansionTile(
+                      title: Text(subjectName),
+                      children: tasks.map((task) {
+                        String taskId = task['task_id'] ?? '';
+                        String taskTitle = task['title'] ?? '';
+                        return ListTile(
+                          title: Text(taskTitle),
+                          onTap: () => _navigateToTask(context, taskId),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
-                );
-              },
+                  },
+                ),
+              ),
             );
           }
         },

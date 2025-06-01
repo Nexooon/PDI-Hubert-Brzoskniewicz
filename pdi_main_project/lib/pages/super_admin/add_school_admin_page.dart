@@ -108,86 +108,93 @@ class _AddSchoolAdminPageState extends State<AddSchoolAdminPage> {
       appBar: AppBar(
         title: const Text('Dodaj administratora szkoły'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Imię'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać imię'
-                    : null,
-              ),
-              TextFormField(
-                controller: _surnameController,
-                decoration: const InputDecoration(labelText: 'Nazwisko'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać nazwisko'
-                    : null,
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać email'
-                    : null,
-              ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Hasło'),
-                obscureText: false,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać hasło'
-                    : null,
-              ),
-              const SizedBox(height: 15),
-              schoolsData != null
-                  ? SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      child: DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Szkoła',
-                          border: OutlineInputBorder(),
-                        ),
-                        value: selectedSchool,
-                        items: schoolsData!.keys.map((schoolId) {
-                          return DropdownMenuItem<String>(
-                            value: schoolId,
-                            child: Tooltip(
-                              message: schoolsData![schoolId],
-                              child: Text(
-                                schoolsData![schoolId],
-                                overflow: TextOverflow.ellipsis,
+      body: Center(
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(labelText: 'Imię'),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Proszę wpisać imię'
+                          : null,
+                    ),
+                    TextFormField(
+                      controller: _surnameController,
+                      decoration: const InputDecoration(labelText: 'Nazwisko'),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Proszę wpisać nazwisko'
+                          : null,
+                    ),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Proszę wpisać email'
+                          : null,
+                    ),
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: const InputDecoration(labelText: 'Hasło'),
+                      obscureText: false,
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Proszę wpisać hasło'
+                          : null,
+                    ),
+                    const SizedBox(height: 15),
+                    schoolsData != null
+                        ? SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            child: DropdownButtonFormField<String>(
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Szkoła',
+                                border: OutlineInputBorder(),
                               ),
+                              value: selectedSchool,
+                              items: schoolsData!.keys.map((schoolId) {
+                                return DropdownMenuItem<String>(
+                                  value: schoolId,
+                                  child: Tooltip(
+                                    message: schoolsData![schoolId],
+                                    child: Text(
+                                      schoolsData![schoolId],
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedSchool = value;
+                                });
+                              },
+                              validator: (value) =>
+                                  value == null ? 'Proszę wybrać szkołę' : null,
                             ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedSchool = value;
-                          });
+                          )
+                        : const CircularProgressIndicator(),
+                    _errorMessage(),
+                    const SizedBox(height: 10),
+                    if (isLoading)
+                      const CircularProgressIndicator()
+                    else
+                      ElevatedButton(
+                        onPressed: () async {
+                          await createSchoolAdmin();
                         },
-                        validator: (value) =>
-                            value == null ? 'Proszę wybrać szkołę' : null,
+                        child: const Text('Dodaj szkolnego administratora'),
                       ),
-                    )
-                  : const CircularProgressIndicator(),
-              _errorMessage(),
-              const SizedBox(height: 10),
-              if (isLoading)
-                const CircularProgressIndicator()
-              else
-                ElevatedButton(
-                  onPressed: () async {
-                    await createSchoolAdmin();
-                  },
-                  child: const Text('Dodaj szkolnego administratora'),
+                  ],
                 ),
-            ],
+              ),
+            ),
           ),
         ),
       ),

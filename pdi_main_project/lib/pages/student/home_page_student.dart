@@ -186,35 +186,40 @@ class _HomePageStudentState extends State<HomePageStudent> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text(
-              'Dzisiejszy plan zajęć',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            TodayLessonsWidget(
-              schoolId: widget.schoolId,
-              studentId: widget.currentUserUid,
-              databaseMethods: widget.databaseMethods,
-            ),
-            const SizedBox(height: 10),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child:
-                  Text('Najnowsze ogłoszenia', style: TextStyle(fontSize: 20)),
-            ),
-            Expanded(
-              child: AnnouncementsWidget(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'Dzisiejszy plan zajęć',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TodayLessonsWidget(
+                  schoolId: widget.schoolId,
+                  studentId: widget.currentUserUid,
                   databaseMethods: widget.databaseMethods,
-                  schoolId: widget.schoolId),
+                ),
+                const SizedBox(height: 10),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Najnowsze ogłoszenia',
+                      style: TextStyle(fontSize: 20)),
+                ),
+                Expanded(
+                  child: AnnouncementsWidget(
+                      databaseMethods: widget.databaseMethods,
+                      schoolId: widget.schoolId),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

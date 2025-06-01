@@ -68,103 +68,110 @@ class _HomePageParentState extends State<HomePageParent> {
           }
 
           Map<String, dynamic> children = snapshot.data!;
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const Text(
-                  'Twoje dzieci',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: children.length,
-                    itemBuilder: (context, index) {
-                      String childId = children.keys.elementAt(index);
-                      String childName = children[childId];
-                      return Card(
-                        child: ListTile(
-                          title: Text(childName),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Nawigacja do strony z ocenami
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => GradesPage(
-                                        currentUserUid: childId,
-                                        databaseMethods: widget.databaseMethods,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: const Text('Oceny'),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Text(
+                      'Twoje dzieci',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: children.length,
+                        itemBuilder: (context, index) {
+                          String childId = children.keys.elementAt(index);
+                          String childName = children[childId];
+                          return Card(
+                            child: ListTile(
+                              title: Text(childName),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      // Nawigacja do strony z ocenami
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => GradesPage(
+                                            currentUserUid: childId,
+                                            databaseMethods:
+                                                widget.databaseMethods,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text('Oceny'),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => AttendancePage(
+                                            currentUserUid: childId,
+                                            userRole: 'parent',
+                                            databaseMethods:
+                                                widget.databaseMethods,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text('Frekwencja'),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 10),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AttendancePage(
-                                        currentUserUid: childId,
-                                        userRole: 'parent',
-                                        databaseMethods: widget.databaseMethods,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: const Text('Frekwencja'),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // const Text(
+                    //   'Ogłoszenia',
+                    //   style: TextStyle(
+                    //     fontSize: 24,
+                    //     fontWeight: FontWeight.bold,
+                    //   ),
+                    // ),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('Najnowsze ogłoszenia',
+                          style: TextStyle(fontSize: 20)),
+                    ),
+                    Expanded(
+                      child: AnnouncementsWidget(
+                        databaseMethods: widget.databaseMethods,
+                        schoolId: widget.schoolId,
+                      ),
+                    ),
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AnnouncementsPage(
+                                currentUserRole: 'parent',
+                                schoolId: widget.schoolId,
+                                databaseMethods: widget.databaseMethods,
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                            ),
+                          );
+                        },
+                        child: const Text('Strona ogłoszeń')),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                // const Text(
-                //   'Ogłoszenia',
-                //   style: TextStyle(
-                //     fontSize: 24,
-                //     fontWeight: FontWeight.bold,
-                //   ),
-                // ),
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('Najnowsze ogłoszenia',
-                      style: TextStyle(fontSize: 20)),
-                ),
-                Expanded(
-                  child: AnnouncementsWidget(
-                    databaseMethods: widget.databaseMethods,
-                    schoolId: widget.schoolId,
-                  ),
-                ),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AnnouncementsPage(
-                            currentUserRole: 'parent',
-                            schoolId: widget.schoolId,
-                            databaseMethods: widget.databaseMethods,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Text('Strona ogłoszeń')),
-              ],
+              ),
             ),
           );
         },

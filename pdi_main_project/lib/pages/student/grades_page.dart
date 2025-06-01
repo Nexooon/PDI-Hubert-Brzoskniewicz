@@ -196,110 +196,117 @@ class _GradesPageState extends State<GradesPage> {
             title: const Text('Oceny Ucznia'),
             backgroundColor: Colors.blue,
           ),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListView(
-              children: schoolYears.keys.map((year) {
-                return ExpansionTile(
-                  title: Text(
-                    year,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  initiallyExpanded: year == schoolYears.keys.first,
-                  children: schoolYears[year]!.map((subjectData) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              subjectData['subject'],
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            const Text(
-                              'Oceny cząstkowe:',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 5),
-                            Wrap(
-                              spacing: 5.0,
-                              runSpacing: 5.0,
-                              children: subjectData['partialGrades']
-                                  .map<Widget>((gradeData) {
-                                return GestureDetector(
-                                  onTap: () => _showGradeDetails(
-                                    context,
-                                    gradeData['grade'],
-                                    gradeData['description'],
-                                    gradeData['comment'],
-                                    gradeData['date'],
+          body: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView(
+                  children: schoolYears.keys.map((year) {
+                    return ExpansionTile(
+                      title: Text(
+                        year,
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      initiallyExpanded: year == schoolYears.keys.first,
+                      children: schoolYears[year]!.map((subjectData) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  subjectData['subject'],
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
                                   ),
+                                ),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  'Oceny cząstkowe:',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 5),
+                                Wrap(
+                                  spacing: 5.0,
+                                  runSpacing: 5.0,
+                                  children: subjectData['partialGrades']
+                                      .map<Widget>((gradeData) {
+                                    return GestureDetector(
+                                      onTap: () => _showGradeDetails(
+                                        context,
+                                        gradeData['grade'],
+                                        gradeData['description'],
+                                        gradeData['comment'],
+                                        gradeData['date'],
+                                      ),
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 5),
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue[100],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          gradeData['grade'],
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  'Ocena końcowa:',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  // onTap: () => _showGradeDetails(
+                                  //   context,
+                                  //   subjectData['finalGrade']['grade'],
+                                  //   subjectData['finalGrade']['description'],
+                                  //   subjectData['finalGrade']['comment'],
+                                  //   subjectData['finalGrade']['date'],
+                                  // ),
                                   child: Container(
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 5),
-                                    padding: const EdgeInsets.all(8),
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 5),
+                                    padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: Colors.blue[100],
+                                      color: Colors.green[200],
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
-                                      gradeData['grade'],
+                                      subjectData['finalGrade']['grade'],
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                            ),
-                            const SizedBox(height: 10),
-                            const Text(
-                              'Ocena końcowa:',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red,
-                              ),
-                            ),
-                            GestureDetector(
-                              // onTap: () => _showGradeDetails(
-                              //   context,
-                              //   subjectData['finalGrade']['grade'],
-                              //   subjectData['finalGrade']['description'],
-                              //   subjectData['finalGrade']['comment'],
-                              //   subjectData['finalGrade']['date'],
-                              // ),
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(vertical: 5),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.green[200],
-                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Text(
-                                  subjectData['finalGrade']['grade'],
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      }).toList(),
                     );
                   }).toList(),
-                );
-              }).toList(),
+                ),
+              ),
             ),
           ),
         );

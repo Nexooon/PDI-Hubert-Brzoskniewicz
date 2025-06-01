@@ -122,30 +122,33 @@ class _TeacherTimetablePageState extends State<TeacherTimetablePage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Plan nauczyciela')),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columnSpacing: 20,
-          headingRowColor:
-              WidgetStateProperty.all(Theme.of(context).primaryColorLight),
-          columns: [
-            const DataColumn(label: Text('Godzina')),
-            ...daysOfWeek.map((day) => DataColumn(label: Text(day))),
-          ],
-          rows: lessonNumbers.map((lessonNum) {
-            final time = lessonTimes[lessonNum];
-            final timeLabel = '${time['start']} - ${time['end']}';
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columnSpacing: 20,
+            headingRowColor:
+                WidgetStateProperty.all(Theme.of(context).primaryColorLight),
+            columns: [
+              const DataColumn(label: Text('Godzina')),
+              ...daysOfWeek.map((day) => DataColumn(label: Text(day))),
+            ],
+            rows: lessonNumbers.map((lessonNum) {
+              final time = lessonTimes[lessonNum];
+              final timeLabel = '${time['start']} - ${time['end']}';
 
-            return DataRow(cells: [
-              DataCell(Text('Lekcja $lessonNum\n$timeLabel')),
-              ...daysOfWeek.map((day) {
-                final entry = timetableMatrix[day]![lessonNum];
-                if (entry == null) return const DataCell(Text(''));
-                return DataCell(Text(
-                    '${entry['subject']}\n${entry['room']}, kl. ${entry['className']}'));
-              }),
-            ]);
-          }).toList(),
+              return DataRow(cells: [
+                DataCell(Text('Lekcja $lessonNum\n$timeLabel')),
+                ...daysOfWeek.map((day) {
+                  final entry = timetableMatrix[day]![lessonNum];
+                  if (entry == null) return const DataCell(Text(''));
+                  return DataCell(Text(
+                      '${entry['subject']}\n${entry['room']}, kl. ${entry['className']}'));
+                }),
+              ]);
+            }).toList(),
+          ),
         ),
       ),
     );

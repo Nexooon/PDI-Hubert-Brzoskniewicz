@@ -54,22 +54,28 @@ class StudentSubjectsPage extends StatelessWidget {
             return const Center(child: Text('Brak przedmiotów'));
           } else {
             Map<String, dynamic> studentData = snapshot.data!;
-            return ListView.builder(
-              itemCount: studentData.length,
-              itemBuilder: (context, subjectIndex) {
-                String subjectName = studentData.keys.elementAt(subjectIndex);
-                return ListTile(
-                  title: Text(subjectName),
-                  trailing: const Icon(Icons.arrow_forward),
-                  onTap: () {
-                    _navigateToSubject(
-                        context,
-                        studentData[subjectName]['schoolId'],
-                        studentData[subjectName]['classId'],
-                        studentData[subjectName]['id']);
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800.0),
+                child: ListView.builder(
+                  itemCount: studentData.length,
+                  itemBuilder: (context, subjectIndex) {
+                    String subjectName =
+                        studentData.keys.elementAt(subjectIndex);
+                    return ListTile(
+                      title: Text(subjectName),
+                      trailing: const Icon(Icons.arrow_forward),
+                      onTap: () {
+                        _navigateToSubject(
+                            context,
+                            studentData[subjectName]['schoolId'],
+                            studentData[subjectName]['classId'],
+                            studentData[subjectName]['id']);
+                      },
+                    );
                   },
-                );
-              },
+                ),
+              ),
             );
           }
         },

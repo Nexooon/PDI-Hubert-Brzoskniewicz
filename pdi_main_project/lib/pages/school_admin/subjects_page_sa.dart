@@ -196,52 +196,57 @@ class _SubjectsPageState extends State<SubjectsPageSa> {
           }
 
           final subjects = snapshot.data!;
-          return ListView.builder(
-            itemCount: subjects.length,
-            itemBuilder: (context, index) {
-              final subject = subjects[index];
-              return FutureBuilder<String>(
-                future: _getTeacherName(subject['employee']),
-                builder: (context, snapshot) {
-                  final teacherName = snapshot.data ?? 'Wczytywanie...';
-                  return ListTile(
-                    title: Text(subject['name']),
-                    subtitle: Text(
-                        'Rok: ${subject['year']}, nauczyciel: $teacherName'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.schedule),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => SubjectTimetablePage(
-                                  databaseMethods: widget.databaseMethods,
-                                  schoolId: widget.schoolId,
-                                  classId: widget.classId,
-                                  subjectId: subject['id'],
-                                  subjectName: subject['name'],
-                                ),
-                              ),
-                            );
-                          },
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: ListView.builder(
+                itemCount: subjects.length,
+                itemBuilder: (context, index) {
+                  final subject = subjects[index];
+                  return FutureBuilder<String>(
+                    future: _getTeacherName(subject['employee']),
+                    builder: (context, snapshot) {
+                      final teacherName = snapshot.data ?? 'Wczytywanie...';
+                      return ListTile(
+                        title: Text(subject['name']),
+                        subtitle: Text(
+                            'Rok: ${subject['year']}, nauczyciel: $teacherName'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.schedule),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SubjectTimetablePage(
+                                      databaseMethods: widget.databaseMethods,
+                                      schoolId: widget.schoolId,
+                                      classId: widget.classId,
+                                      subjectId: subject['id'],
+                                      subjectName: subject['name'],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () => _showEditDialog(
+                                    subjectId: subject['id'],
+                                    subjectData: subject)),
+                            IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () => _confirmDelete(subject['id'])),
+                          ],
                         ),
-                        IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () => _showEditDialog(
-                                subjectId: subject['id'],
-                                subjectData: subject)),
-                        IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _confirmDelete(subject['id'])),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 },
-              );
-            },
+              ),
+            ),
           );
         },
       ),

@@ -162,31 +162,36 @@ class _ManageSchoolsPageState extends State<ManageSchoolsPage> {
           ? const Center(child: CircularProgressIndicator())
           : errorMessage != null
               ? Center(child: Text('Błąd: $errorMessage'))
-              : ListView(
-                  children: schools!.entries.map((entry) {
-                    final id = entry.key;
-                    final school = entry.value;
-                    return ListTile(
-                      title: Text(school['name']),
-                      subtitle: Text(
-                          '${school['address']}\nKontakt: ${school['contact']}\nRok: ${school['current_year']}'),
-                      isThreeLine: true,
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () =>
-                                _showSchoolDialog(school: school, schoolId: id),
+              : Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 800),
+                    child: ListView(
+                      children: schools!.entries.map((entry) {
+                        final id = entry.key;
+                        final school = entry.value;
+                        return ListTile(
+                          title: Text(school['name']),
+                          subtitle: Text(
+                              '${school['address']}\nKontakt: ${school['contact']}\nRok: ${school['current_year']}'),
+                          isThreeLine: true,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () => _showSchoolDialog(
+                                    school: school, schoolId: id),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () => _deleteSchool(id),
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _deleteSchool(id),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
     );
   }

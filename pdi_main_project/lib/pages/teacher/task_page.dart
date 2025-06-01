@@ -134,6 +134,7 @@ class _TaskPageState extends State<TaskPage> {
           icon: const Icon(Icons.download),
           label: const Text('Pobierz rozwiązanie'),
         ),
+        const SizedBox(height: 8),
         if (submissionInfoWidget != null) submissionInfoWidget,
       ],
     );
@@ -192,101 +193,108 @@ class _TaskPageState extends State<TaskPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Center(
-                child: Text(
-                  'Zadanie: ${taskData!['title'] ?? 'Brak tytułu'}',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: Text(
-                  'Uczeń: ${userData!['name']} ${userData!['surname']}',
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: Text(
-                  'Termin na wykonanie: ${taskData!['due_date'] != null ? DateFormat('dd.MM.yyyy HH:mm').format((taskData!['due_date'] as Timestamp).toDate()) : 'Brak terminu'}',
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.lightBlue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Treść zadania:',
-                        style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 6),
-                    Text(taskData!['content'] ?? 'Brak treści'),
-                    const SizedBox(
-                      width: 280,
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 700),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      'Zadanie: ${taskData!['title'] ?? 'Brak tytułu'}',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      'Uczeń: ${userData!['name']} ${userData!['surname']}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      'Termin na wykonanie: ${taskData!['due_date'] != null ? DateFormat('dd.MM.yyyy HH:mm').format((taskData!['due_date'] as Timestamp).toDate()) : 'Brak terminu'}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.lightBlue.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Treść zadania:',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 6),
+                        Text(taskData!['content'] ?? 'Brak treści'),
+                        const SizedBox(
+                          width: 280,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildFileSection(),
+                  const SizedBox(height: 16),
+                  Text('Status: $status'),
+                  Text('Ocenione: ${isGraded ? 'Tak' : 'Nie'}'),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        DropdownButtonFormField<String>(
+                          value: _selectedGrade,
+                          decoration: const InputDecoration(labelText: 'Ocena'),
+                          items: _grades
+                              .map((grade) => DropdownMenuItem(
+                                    value: grade,
+                                    child: Text(grade),
+                                  ))
+                              .toList(),
+                          onChanged: (val) =>
+                              setState(() => _selectedGrade = val),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _commentController,
+                          decoration: const InputDecoration(
+                            labelText: 'Komentarz',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 3,
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: _saveGradeAndComment,
+                          icon: const Icon(Icons.save),
+                          label: const Text('Zapisz ocenę i komentarz'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              _buildFileSection(),
-              const SizedBox(height: 16),
-              Text('Status: $status'),
-              Text('Ocenione: ${isGraded ? 'Tak' : 'Nie'}'),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    DropdownButtonFormField<String>(
-                      value: _selectedGrade,
-                      decoration: const InputDecoration(labelText: 'Ocena'),
-                      items: _grades
-                          .map((grade) => DropdownMenuItem(
-                                value: grade,
-                                child: Text(grade),
-                              ))
-                          .toList(),
-                      onChanged: (val) => setState(() => _selectedGrade = val),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _commentController,
-                      decoration: const InputDecoration(
-                        labelText: 'Komentarz',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: _saveGradeAndComment,
-                      icon: const Icon(Icons.save),
-                      label: const Text('Zapisz ocenę i komentarz'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

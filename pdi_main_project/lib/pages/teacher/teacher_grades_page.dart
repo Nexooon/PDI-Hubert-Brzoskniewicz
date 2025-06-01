@@ -27,6 +27,7 @@ class TeacherGradesPage extends StatefulWidget {
 }
 
 class _TeacherGradesPageState extends State<TeacherGradesPage> {
+  final ScrollController _horizontalController = ScrollController();
   late Future<List<Map<String, dynamic>>> _studentsGradesFuture;
   final List<String> _additionalGradeTypes = [];
   final List<GradeEntry> _gradesToAdd = [];
@@ -398,88 +399,94 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
 
               return Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
+                child: Scrollbar(
+                  controller: _horizontalController,
                   child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: DataTable(
-                      columns: [
-                        const DataColumn(label: Text('Uczeń')),
-                        ...gradeTypes.map((gradeType) {
-                          return DataColumn(
-                            label: Row(
-                              children: [
-                                Text(gradeType),
-                                IconButton(
-                                  icon: const Icon(Icons.edit, size: 18),
-                                  onPressed: () => _editColumnWeight(
-                                      context, gradeType, studentsGrades),
-                                  tooltip: 'Edytuj wagę kolumny',
-                                ),
-                              ],
-                            ),
+                    controller: _horizontalController,
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: DataTable(
+                        columns: [
+                          const DataColumn(label: Text('Uczeń')),
+                          ...gradeTypes.map((gradeType) {
+                            return DataColumn(
+                              label: Row(
+                                children: [
+                                  Text(gradeType),
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, size: 18),
+                                    onPressed: () => _editColumnWeight(
+                                        context, gradeType, studentsGrades),
+                                    tooltip: 'Edytuj wagę kolumny',
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ],
+                        rows: studentsGrades.map((student) {
+                          return DataRow(
+                            cells: [
+                              DataCell(Text(student['name'])),
+                              ...gradeTypes.map((gradeType) {
+                                final gradeData = student['grades'][gradeType];
+                                final gradeValue = gradeData?['value'] ?? '-';
+                                final gradeWeight = gradeData?['weight'] ?? 0;
+                                final gradeComment =
+                                    gradeData?['comment'] ?? '';
+                                final gradeId = gradeData?['grade_id'] ?? '';
+
+                                GradeEntry? pending = getPendingGrade(
+                                    student['student_id'], gradeType);
+                                final displayValue =
+                                    pending?.value ?? gradeValue;
+                                final isPending = pending != null;
+
+                                return DataCell(
+                                  GestureDetector(
+                                    onTap: () {
+                                      _editGrade(
+                                          context,
+                                          student['student_id'],
+                                          student['name'],
+                                          gradeType,
+                                          gradeValue,
+                                          gradeWeight,
+                                          gradeComment,
+                                          gradeId);
+                                    },
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          displayValue ?? '-',
+                                          style: TextStyle(
+                                            color: isPending
+                                                ? Colors.blue
+                                                : Colors.black,
+                                            fontWeight: isPending
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Waga: $gradeWeight',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ],
                           );
                         }).toList(),
-                      ],
-                      rows: studentsGrades.map((student) {
-                        return DataRow(
-                          cells: [
-                            DataCell(Text(student['name'])),
-                            ...gradeTypes.map((gradeType) {
-                              final gradeData = student['grades'][gradeType];
-                              final gradeValue = gradeData?['value'] ?? '-';
-                              final gradeWeight = gradeData?['weight'] ?? 0;
-                              final gradeComment = gradeData?['comment'] ?? '';
-                              final gradeId = gradeData?['grade_id'] ?? '';
-
-                              GradeEntry? pending = getPendingGrade(
-                                  student['student_id'], gradeType);
-                              final displayValue = pending?.value ?? gradeValue;
-                              final isPending = pending != null;
-
-                              return DataCell(
-                                GestureDetector(
-                                  onTap: () {
-                                    _editGrade(
-                                        context,
-                                        student['student_id'],
-                                        student['name'],
-                                        gradeType,
-                                        gradeValue,
-                                        gradeWeight,
-                                        gradeComment,
-                                        gradeId);
-                                  },
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        displayValue ?? '-',
-                                        style: TextStyle(
-                                          color: isPending
-                                              ? Colors.blue
-                                              : Colors.black,
-                                          fontWeight: isPending
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Waga: $gradeWeight',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ],
-                        );
-                      }).toList(),
+                      ),
                     ),
                   ),
                 ),

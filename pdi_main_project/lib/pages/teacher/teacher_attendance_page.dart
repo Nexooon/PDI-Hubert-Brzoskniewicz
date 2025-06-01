@@ -22,6 +22,7 @@ class TeacherAttendancePage extends StatefulWidget {
 }
 
 class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
+  final ScrollController _horizontalController = ScrollController();
   late Future<List<Map<String, dynamic>>> _studentsAttendanceFuture;
   Map<String, String> studentsMap = {}; // ID -> Nazwa ucznia
   Map<String, Map<String, String>> editedAttendance =
@@ -94,80 +95,86 @@ class _TeacherAttendancePageState extends State<TeacherAttendancePage> {
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            child: Scrollbar(
+              thumbVisibility: false, // wymusza widoczność paska
+              trackVisibility: false, // widoczna ścieżka
+              controller: _horizontalController,
               child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: DataTable(
-                  columns: [
-                    const DataColumn(label: Text('Uczeń')),
-                    ...studentsAttendance.map((lesson) {
-                      return DataColumn(
-                        label: Text(
-                          lesson['date'].toDate().toString().split(' ')[0],
-                        ),
+                controller: _horizontalController,
+                scrollDirection: Axis.horizontal,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: DataTable(
+                    columns: [
+                      const DataColumn(label: Text('Uczeń')),
+                      ...studentsAttendance.map((lesson) {
+                        return DataColumn(
+                          label: Text(
+                            lesson['date'].toDate().toString().split(' ')[0],
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                    rows: studentsMap.entries.map((entry) {
+                      String studentId = entry.key;
+                      String studentName = entry.value;
+
+                      return DataRow(
+                        cells: [
+                          DataCell(Text(studentName)),
+                          ...studentsAttendance.map((lesson) {
+                            // String lessonDate =
+                            //     lesson['date'].toDate().toString().split(' ')[0];
+                            String lessonID = lesson['lesson_id'];
+
+                            var studentData = lesson['students'].firstWhere(
+                              (s) => s['student_id'] == studentId,
+                              orElse: () => {'attendance': 'Brak danych'},
+                            );
+
+                            String? initialAttendanceStatus =
+                                studentData['attendance'] == 'Brak danych'
+                                    ? null
+                                    : studentData['attendance'];
+
+                            String? currentValue = editedAttendance[studentId]
+                                    ?[lessonID] ??
+                                initialAttendanceStatus;
+
+                            return DataCell(
+                              DropdownButton<String>(
+                                value: currentValue,
+                                hint: const Text("Wybierz"),
+                                items: [
+                                  'Obecny',
+                                  'Nieobecny',
+                                  'Spóźniony',
+                                  'Nieobecny usprawiedliwiony'
+                                ]
+                                    .map((status) => DropdownMenuItem(
+                                          value: status,
+                                          child: SizedBox(
+                                            width: 126,
+                                            child: Text(status,
+                                                overflow: TextOverflow.visible),
+                                          ),
+                                        ))
+                                    .toList(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    editedAttendance.putIfAbsent(
+                                        studentId, () => {});
+                                    editedAttendance[studentId]![lessonID] =
+                                        newValue!;
+                                  });
+                                },
+                              ),
+                            );
+                          }).toList(),
+                        ],
                       );
                     }).toList(),
-                  ],
-                  rows: studentsMap.entries.map((entry) {
-                    String studentId = entry.key;
-                    String studentName = entry.value;
-
-                    return DataRow(
-                      cells: [
-                        DataCell(Text(studentName)),
-                        ...studentsAttendance.map((lesson) {
-                          // String lessonDate =
-                          //     lesson['date'].toDate().toString().split(' ')[0];
-                          String lessonID = lesson['lesson_id'];
-
-                          var studentData = lesson['students'].firstWhere(
-                            (s) => s['student_id'] == studentId,
-                            orElse: () => {'attendance': 'Brak danych'},
-                          );
-
-                          String? initialAttendanceStatus =
-                              studentData['attendance'] == 'Brak danych'
-                                  ? null
-                                  : studentData['attendance'];
-
-                          String? currentValue = editedAttendance[studentId]
-                                  ?[lessonID] ??
-                              initialAttendanceStatus;
-
-                          return DataCell(
-                            DropdownButton<String>(
-                              value: currentValue,
-                              hint: const Text("Wybierz"),
-                              items: [
-                                'Obecny',
-                                'Nieobecny',
-                                'Spóźniony',
-                                'Nieobecny usprawiedliwiony'
-                              ]
-                                  .map((status) => DropdownMenuItem(
-                                        value: status,
-                                        child: SizedBox(
-                                          width: 126,
-                                          child: Text(status,
-                                              overflow: TextOverflow.visible),
-                                        ),
-                                      ))
-                                  .toList(),
-                              onChanged: (newValue) {
-                                setState(() {
-                                  editedAttendance.putIfAbsent(
-                                      studentId, () => {});
-                                  editedAttendance[studentId]![lessonID] =
-                                      newValue!;
-                                });
-                              },
-                            ),
-                          );
-                        }).toList(),
-                      ],
-                    );
-                  }).toList(),
+                  ),
                 ),
               ),
             ),

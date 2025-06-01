@@ -153,97 +153,102 @@ class _HomePageTeacherState extends State<HomePageTeacher> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text(
-              'Dzisiejszy plan zajęć',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            FutureBuilder<Map<String, dynamic>>(
-              future: _loadTodayTimetable(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'Dzisiejszy plan zajęć',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                FutureBuilder<Map<String, dynamic>>(
+                  future: _loadTodayTimetable(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                if (!snapshot.hasData) {
-                  return const Text('Brak danych planu.');
-                }
+                    if (!snapshot.hasData) {
+                      return const Text('Brak danych planu.');
+                    }
 
-                final lessonTimes =
-                    snapshot.data!['lessonTimes'] as Map<String, dynamic>;
-                final timetableMatrix = snapshot.data!['timetableMatrix']
-                    as Map<String, Map<String, Map<String, dynamic>>>;
+                    final lessonTimes =
+                        snapshot.data!['lessonTimes'] as Map<String, dynamic>;
+                    final timetableMatrix = snapshot.data!['timetableMatrix']
+                        as Map<String, Map<String, Map<String, dynamic>>>;
 
-                final weekday = DateTime.now().weekday;
-                final daysOfWeek = [
-                  'Poniedziałek',
-                  'Wtorek',
-                  'Środa',
-                  'Czwartek',
-                  'Piątek'
-                ];
-                if (weekday < 1 || weekday > 5) {
-                  return const Text('Dziś nie ma lekcji (weekend).');
-                }
+                    final weekday = DateTime.now().weekday;
+                    final daysOfWeek = [
+                      'Poniedziałek',
+                      'Wtorek',
+                      'Środa',
+                      'Czwartek',
+                      'Piątek'
+                    ];
+                    if (weekday < 1 || weekday > 5) {
+                      return const Text('Dziś nie ma lekcji (weekend).');
+                    }
 
-                final today = daysOfWeek[weekday - 1];
-                // final today = "Poniedziałek";
-                final todayPlan = timetableMatrix[today]!;
+                    final today = daysOfWeek[weekday - 1];
+                    // final today = "Poniedziałek";
+                    final todayPlan = timetableMatrix[today]!;
 
-                if (todayPlan.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12.0),
-                    child: Text(
-                      'Brak zaplanowanych lekcji na dziś.',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  );
-                }
-
-                final sortedLessons = todayPlan.entries.toList()
-                  ..sort(
-                      (a, b) => int.parse(a.key).compareTo(int.parse(b.key)));
-
-                return Column(
-                  children: sortedLessons.map((entry) {
-                    final lessonNum = entry.key;
-                    final data = entry.value;
-                    final time = lessonTimes[lessonNum];
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 4),
-                      child: ListTile(
-                        title: Text(
-                            '${data['subject']} (${data['room']}) - kl. ${data['className']}'),
-                        subtitle: Text(
-                          'Lekcja $lessonNum: ${time['start']} - ${time['end']}',
+                    if (todayPlan.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12.0),
+                        child: Text(
+                          'Brak zaplanowanych lekcji na dziś.',
+                          style: TextStyle(fontSize: 16),
                         ),
-                      ),
+                      );
+                    }
+
+                    final sortedLessons = todayPlan.entries.toList()
+                      ..sort((a, b) =>
+                          int.parse(a.key).compareTo(int.parse(b.key)));
+
+                    return Column(
+                      children: sortedLessons.map((entry) {
+                        final lessonNum = entry.key;
+                        final data = entry.value;
+                        final time = lessonTimes[lessonNum];
+
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          child: ListTile(
+                            title: Text(
+                                '${data['subject']} (${data['room']}) - kl. ${data['className']}'),
+                            subtitle: Text(
+                              'Lekcja $lessonNum: ${time['start']} - ${time['end']}',
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
-                );
-              },
+                  },
+                ),
+                const SizedBox(height: 20),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Najnowsze ogłoszenia',
+                      style: TextStyle(fontSize: 20)),
+                ),
+                Expanded(
+                  child: AnnouncementsWidget(
+                    databaseMethods: widget.databaseMethods,
+                    schoolId: widget.schoolId,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child:
-                  Text('Najnowsze ogłoszenia', style: TextStyle(fontSize: 20)),
-            ),
-            Expanded(
-              child: AnnouncementsWidget(
-                databaseMethods: widget.databaseMethods,
-                schoolId: widget.schoolId,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -141,38 +141,42 @@ class _StudentTimetablePageState extends State<TimetablePage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Plan zajęć')),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: [
-            const DataColumn(label: Text('Lekcja')),
-            ...daysOfWeek.map((day) => DataColumn(label: Text(day))),
-          ],
-          rows: allLessonNumbers.map((lessonNumber) {
-            final lessonTime = lessonTimes[lessonNumber.toString()] ?? {};
-            final timeRange =
-                '${lessonTime['start'] ?? '-'} - ${lessonTime['end'] ?? '-'}';
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columns: [
+              const DataColumn(label: Text('Lekcja')),
+              ...daysOfWeek.map((day) => DataColumn(label: Text(day))),
+            ],
+            rows: allLessonNumbers.map((lessonNumber) {
+              final lessonTime = lessonTimes[lessonNumber.toString()] ?? {};
+              final timeRange =
+                  '${lessonTime['start'] ?? '-'} - ${lessonTime['end'] ?? '-'}';
 
-            return DataRow(cells: [
-              DataCell(Text('L$lessonNumber\n$timeRange')),
-              ...daysOfWeek.map((day) {
-                final lesson = timetableMatrix[lessonNumber]?[day];
-                if (lesson != null) {
-                  return DataCell(Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(lesson['subject'] ?? '',
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                      Text('Sala: ${lesson['room'] ?? '-'}'),
-                    ],
-                  ));
-                } else {
-                  return const DataCell(Text('-'));
-                }
-              }).toList(),
-            ]);
-          }).toList(),
+              return DataRow(cells: [
+                DataCell(Text('L$lessonNumber\n$timeRange')),
+                ...daysOfWeek.map((day) {
+                  final lesson = timetableMatrix[lessonNumber]?[day];
+                  if (lesson != null) {
+                    return DataCell(Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(lesson['subject'] ?? '',
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                        Text('Sala: ${lesson['room'] ?? '-'}'),
+                      ],
+                    ));
+                  } else {
+                    return const DataCell(Text('-'));
+                  }
+                }).toList(),
+              ]);
+            }).toList(),
+          ),
         ),
       ),
     );

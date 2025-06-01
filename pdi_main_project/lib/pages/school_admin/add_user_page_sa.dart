@@ -145,149 +145,156 @@ class _HomePageSchoolAdminState extends State<AddUserPageSa> {
       appBar: AppBar(
         title: const Text('Dodaj użytkownika'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Imię'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać imię'
-                    : null,
-              ),
-              TextFormField(
-                controller: _surnameController,
-                decoration: const InputDecoration(labelText: 'Nazwisko'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać nazwisko'
-                    : null,
-              ),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać email'
-                    : null,
-              ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Hasło'),
-                obscureText: false,
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Proszę wpisać hasło'
-                    : null,
-              ),
-              const SizedBox(height: 15),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Rola',
-                  border: OutlineInputBorder(),
+      body: Center(
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(labelText: 'Imię'),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Proszę wpisać imię'
+                          : null,
+                    ),
+                    TextFormField(
+                      controller: _surnameController,
+                      decoration: const InputDecoration(labelText: 'Nazwisko'),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Proszę wpisać nazwisko'
+                          : null,
+                    ),
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Proszę wpisać email'
+                          : null,
+                    ),
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: const InputDecoration(labelText: 'Hasło'),
+                      obscureText: false,
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Proszę wpisać hasło'
+                          : null,
+                    ),
+                    const SizedBox(height: 15),
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Rola',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: selectedRole,
+                      items: roles.map((role) {
+                        return DropdownMenuItem<String>(
+                          value: role,
+                          child: Text(role),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedRole = value;
+                        });
+                      },
+                      validator: (value) =>
+                          value == null ? 'Proszę wybrać rolę' : null,
+                    ),
+                    const SizedBox(height: 15),
+                    selectedRole == 'student'
+                        ? Column(
+                            children: [
+                              DropdownButtonFormField<String>(
+                                decoration: const InputDecoration(
+                                  labelText: 'Klasa',
+                                  border: OutlineInputBorder(),
+                                ),
+                                value: selectedClass,
+                                items: classesData!.keys.map((schoolId) {
+                                  return DropdownMenuItem<String>(
+                                    value: schoolId,
+                                    child: Text(classesData![schoolId]),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedClass = value;
+                                  });
+                                },
+                                validator: (value) =>
+                                    value == null && selectedRole == 'student'
+                                        ? 'Proszę wybrać klasę'
+                                        : null,
+                              ),
+                              const SizedBox(height: 15),
+                              DropdownButtonFormField<String>(
+                                decoration: const InputDecoration(
+                                  labelText: 'Rodzic',
+                                  border: OutlineInputBorder(),
+                                ),
+                                value: selectedParent,
+                                items: parentsData!.keys.map((schoolId) {
+                                  return DropdownMenuItem<String>(
+                                    value: schoolId,
+                                    child: Text(parentsData![schoolId]),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedParent = value;
+                                  });
+                                },
+                                validator: (value) =>
+                                    value == null && selectedRole == 'student'
+                                        ? 'Proszę wybrać rodzica'
+                                        : null,
+                              ),
+                            ],
+                          )
+                        // : selectedRole == 'teacher'
+                        //     ? DropdownButtonFormField<String>(
+                        //         decoration: const InputDecoration(
+                        //           labelText: 'Klasa',
+                        //           border: OutlineInputBorder(),
+                        //         ),
+                        //         value: selectedClass,
+                        //         items: classesData!.keys.map((schoolId) {
+                        //           return DropdownMenuItem<String>(
+                        //             value: schoolId,
+                        //             child: Text(classesData![schoolId]),
+                        //           );
+                        //         }).toList(),
+                        //         onChanged: (value) {
+                        //           setState(() {
+                        //             selectedClass = value;
+                        //           });
+                        //         },
+                        //         validator: (value) =>
+                        //             value == null && selectedRole == 'teacher'
+                        //                 ? 'Proszę wybrać klasę'
+                        //                 : null,
+                        //       )
+                        : const SizedBox(),
+                    _errorMessage(),
+                    const SizedBox(height: 10),
+                    if (isLoading)
+                      const CircularProgressIndicator()
+                    else
+                      ElevatedButton(
+                        onPressed: () async {
+                          await createUser();
+                        },
+                        child: const Text('Dodaj użytkownika'),
+                      ),
+                  ],
                 ),
-                value: selectedRole,
-                items: roles.map((role) {
-                  return DropdownMenuItem<String>(
-                    value: role,
-                    child: Text(role),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedRole = value;
-                  });
-                },
-                validator: (value) =>
-                    value == null ? 'Proszę wybrać rolę' : null,
               ),
-              const SizedBox(height: 15),
-              selectedRole == 'student'
-                  ? Column(
-                      children: [
-                        DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            labelText: 'Klasa',
-                            border: OutlineInputBorder(),
-                          ),
-                          value: selectedClass,
-                          items: classesData!.keys.map((schoolId) {
-                            return DropdownMenuItem<String>(
-                              value: schoolId,
-                              child: Text(classesData![schoolId]),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedClass = value;
-                            });
-                          },
-                          validator: (value) =>
-                              value == null && selectedRole == 'student'
-                                  ? 'Proszę wybrać klasę'
-                                  : null,
-                        ),
-                        const SizedBox(height: 15),
-                        DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            labelText: 'Rodzic',
-                            border: OutlineInputBorder(),
-                          ),
-                          value: selectedParent,
-                          items: parentsData!.keys.map((schoolId) {
-                            return DropdownMenuItem<String>(
-                              value: schoolId,
-                              child: Text(parentsData![schoolId]),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedParent = value;
-                            });
-                          },
-                          validator: (value) =>
-                              value == null && selectedRole == 'student'
-                                  ? 'Proszę wybrać rodzica'
-                                  : null,
-                        ),
-                      ],
-                    )
-                  // : selectedRole == 'teacher'
-                  //     ? DropdownButtonFormField<String>(
-                  //         decoration: const InputDecoration(
-                  //           labelText: 'Klasa',
-                  //           border: OutlineInputBorder(),
-                  //         ),
-                  //         value: selectedClass,
-                  //         items: classesData!.keys.map((schoolId) {
-                  //           return DropdownMenuItem<String>(
-                  //             value: schoolId,
-                  //             child: Text(classesData![schoolId]),
-                  //           );
-                  //         }).toList(),
-                  //         onChanged: (value) {
-                  //           setState(() {
-                  //             selectedClass = value;
-                  //           });
-                  //         },
-                  //         validator: (value) =>
-                  //             value == null && selectedRole == 'teacher'
-                  //                 ? 'Proszę wybrać klasę'
-                  //                 : null,
-                  //       )
-                  : const SizedBox(),
-              _errorMessage(),
-              const SizedBox(height: 10),
-              if (isLoading)
-                const CircularProgressIndicator()
-              else
-                ElevatedButton(
-                  onPressed: () async {
-                    await createUser();
-                  },
-                  child: const Text('Dodaj użytkownika'),
-                ),
-            ],
+            ),
           ),
         ),
       ),

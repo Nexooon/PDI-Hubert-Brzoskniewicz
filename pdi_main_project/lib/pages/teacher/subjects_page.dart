@@ -53,33 +53,39 @@ class SubjectsPage extends StatelessWidget {
           } else {
             Map<String, Map<String, List<Map<String, String>>>> teacherData =
                 snapshot.data!;
-            return ListView.builder(
-              itemCount: teacherData.length,
-              itemBuilder: (context, schoolIndex) {
-                String schoolName = teacherData.keys.elementAt(schoolIndex);
-                Map<String, List<Map<String, String>>> classes =
-                    teacherData[schoolName]!;
-                return ExpansionTile(
-                  title: Text(schoolName),
-                  children: classes.keys.map((className) {
-                    List<Map<String, String>> subjects = classes[className]!;
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: ListView.builder(
+                  itemCount: teacherData.length,
+                  itemBuilder: (context, schoolIndex) {
+                    String schoolName = teacherData.keys.elementAt(schoolIndex);
+                    Map<String, List<Map<String, String>>> classes =
+                        teacherData[schoolName]!;
                     return ExpansionTile(
-                      title: Text(className),
-                      children: subjects.map((subject) {
-                        return ListTile(
-                          title: Text(subject['name']!),
-                          onTap: () => _navigateToSubject(
-                            context,
-                            subject['schoolId']!,
-                            subject['classId']!,
-                            subject['id']!,
-                          ),
+                      title: Text(schoolName),
+                      children: classes.keys.map((className) {
+                        List<Map<String, String>> subjects =
+                            classes[className]!;
+                        return ExpansionTile(
+                          title: Text(className),
+                          children: subjects.map((subject) {
+                            return ListTile(
+                              title: Text(subject['name']!),
+                              onTap: () => _navigateToSubject(
+                                context,
+                                subject['schoolId']!,
+                                subject['classId']!,
+                                subject['id']!,
+                              ),
+                            );
+                          }).toList(),
                         );
                       }).toList(),
                     );
-                  }).toList(),
-                );
-              },
+                  },
+                ),
+              ),
             );
           }
         },

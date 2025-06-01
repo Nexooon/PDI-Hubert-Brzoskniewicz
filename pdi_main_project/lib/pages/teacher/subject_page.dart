@@ -177,31 +177,39 @@ class _SubjectPageState extends State<SubjectPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Strona przedmiotowa')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              isTeacher
-                  ? Text(
-                      'Klasa: $className',
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                    )
-                  : const SizedBox.shrink(),
-              Text(
-                'Przedmiot: $subjectName',
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  isTeacher
+                      ? Text(
+                          'Klasa: $className',
+                          style: const TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        )
+                      : const SizedBox.shrink(),
+                  Text(
+                    'Przedmiot: $subjectName',
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  isTeacher
+                      ? _buildManagementButtons()
+                      : const SizedBox.shrink(),
+                  const SizedBox(height: 10),
+                  _buildTasksSection(isTeacher),
+                  _buildFilesSection(isTeacher),
+                  _buildTopicsSection(isTeacher),
+                ],
               ),
-              const SizedBox(height: 10),
-              isTeacher ? _buildManagementButtons() : const SizedBox.shrink(),
-              const SizedBox(height: 10),
-              _buildTasksSection(isTeacher),
-              _buildFilesSection(isTeacher),
-              _buildTopicsSection(isTeacher),
-            ],
+            ),
           ),
         ),
       ),

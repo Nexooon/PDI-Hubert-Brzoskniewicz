@@ -173,20 +173,25 @@ class _SubjectTimetablePageState extends State<SubjectTimetablePage> {
           }
 
           final entries = snapshot.data!;
-          return ListView.builder(
-            itemCount: entries.length,
-            itemBuilder: (context, index) {
-              final entry = entries[index];
-              return ListTile(
-                title: Text(
-                    '${entry['day']}, lekcja nr ${entry['lesson_number']}'),
-                subtitle: Text('Sala: ${entry['room']}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _confirmDeleteEntry(entry['id']),
-                ),
-              );
-            },
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: ListView.builder(
+                itemCount: entries.length,
+                itemBuilder: (context, index) {
+                  final entry = entries[index];
+                  return ListTile(
+                    title: Text(
+                        '${entry['day']}, lekcja nr ${entry['lesson_number']}'),
+                    subtitle: Text('Sala: ${entry['room']}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _confirmDeleteEntry(entry['id']),
+                    ),
+                  );
+                },
+              ),
+            ),
           );
         },
       ),

@@ -121,16 +121,22 @@ class _AttendancePageState extends State<AttendancePage> {
           }
 
           final attendanceData = snapshot.data!;
-          return ListView(
-            padding: const EdgeInsets.all(8.0),
-            children: [
-              if (attendanceData['Spóźniony'].isNotEmpty)
-                AttendanceSection(
-                    title: "Spóźnienia", data: attendanceData['Spóźniony']),
-              if (attendanceData['Nieobecny'].isNotEmpty)
-                AttendanceSection(
-                    title: "Nieobecności", data: attendanceData['Nieobecny']),
-            ],
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: ListView(
+                padding: const EdgeInsets.all(8.0),
+                children: [
+                  if (attendanceData['Spóźniony'].isNotEmpty)
+                    AttendanceSection(
+                        title: "Spóźnienia", data: attendanceData['Spóźniony']),
+                  if (attendanceData['Nieobecny'].isNotEmpty)
+                    AttendanceSection(
+                        title: "Nieobecności",
+                        data: attendanceData['Nieobecny']),
+                ],
+              ),
+            ),
           );
         },
       ),
