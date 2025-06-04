@@ -33,10 +33,20 @@ class _TeacherGradesPageState extends State<TeacherGradesPage> {
   final List<GradeEntry> _gradesToAdd = [];
 
   // Funkcja dodająca nowy typ oceny do tabeli
-  void addNewGradeType(String gradeType) {
+  void addNewGradeType(String gradeType) async {
+    await widget.databaseMethods.addEmptyGradeForAllStudents(
+      widget.schoolId,
+      widget.classId,
+      widget.subjectId,
+      widget.year,
+      gradeType,
+      widget.subjectName,
+    );
+
     setState(() {
-      _additionalGradeTypes.remove(gradeType); // usunięcie jeśli już istnieje
-      _additionalGradeTypes.insert(0, gradeType); // dodanie na początek
+      _loadGrades();
+      // _additionalGradeTypes.remove(gradeType); // usunięcie jeśli już istnieje
+      // _additionalGradeTypes.insert(0, gradeType); // dodanie na początek
     });
   }
 

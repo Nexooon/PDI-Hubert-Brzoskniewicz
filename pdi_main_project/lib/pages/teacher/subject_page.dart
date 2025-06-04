@@ -583,7 +583,7 @@ class _SubjectPageState extends State<SubjectPage> {
         text: lessonData['date'] != null
             ? "${lessonData['date'].toDate().day}-${lessonData['date'].toDate().month}-${lessonData['date'].toDate().year}"
             : '');
-    DateTime? selectedDate;
+    DateTime? selectedDate = lessonData['date']?.toDate();
 
     showDialog(
       context: context,

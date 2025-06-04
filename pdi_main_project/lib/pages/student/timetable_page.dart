@@ -156,7 +156,7 @@ class _StudentTimetablePageState extends State<TimetablePage> {
                   '${lessonTime['start'] ?? '-'} - ${lessonTime['end'] ?? '-'}';
 
               return DataRow(cells: [
-                DataCell(Text('L$lessonNumber\n$timeRange')),
+                DataCell(Text('Lekcja $lessonNumber\n$timeRange')),
                 ...daysOfWeek.map((day) {
                   final lesson = timetableMatrix[lessonNumber]?[day];
                   if (lesson != null) {

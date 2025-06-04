@@ -127,6 +127,10 @@ class _AttendancePageState extends State<AttendancePage> {
               child: ListView(
                 padding: const EdgeInsets.all(8.0),
                 children: [
+                  if (attendanceData['Spóźniony'].isEmpty &&
+                      attendanceData['Nieobecny'].isEmpty)
+                    const Center(
+                        child: Text("Brak informacji o nieobecnościach")),
                   if (attendanceData['Spóźniony'].isNotEmpty)
                     AttendanceSection(
                         title: "Spóźnienia", data: attendanceData['Spóźniony']),

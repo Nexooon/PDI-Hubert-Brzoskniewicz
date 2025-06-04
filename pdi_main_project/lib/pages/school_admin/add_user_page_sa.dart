@@ -49,6 +49,11 @@ class _HomePageSchoolAdminState extends State<AddUserPageSa> {
     try {
       classesData =
           await widget.databaseMethods.getClassIdsFromSchoolId(widget.schoolId);
+      if (classesData != null) {
+        final sortedEntries = classesData!.entries.toList()
+          ..sort((a, b) => a.value.compareTo(b.value));
+        classesData = Map<String, dynamic>.fromEntries(sortedEntries);
+      }
     } catch (e) {
       setState(() {
         errorMessage = 'Nie udało się pobrać klas: $e';
@@ -114,6 +119,7 @@ class _HomePageSchoolAdminState extends State<AddUserPageSa> {
         selectedParent = null;
         errorMessage = '';
         isLoading = false;
+        _loadParentIds();
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

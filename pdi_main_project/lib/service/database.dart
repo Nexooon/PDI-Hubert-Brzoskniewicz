@@ -43,6 +43,7 @@ class DatabaseMethods {
                 .doc(schoolId)
                 .collection('classes')
                 .doc(classId))
+        .orderBy('surname', descending: false)
         .get();
 
     return studentsSnapshot.docs;
@@ -94,12 +95,17 @@ class DatabaseMethods {
             isEqualTo: _firestore.collection('schools').doc(schoolId))
         .get();
 
-    Map<String, dynamic> parentsData = {};
-    for (var classDoc in usersSnapshot.docs) {
-      parentsData[classDoc.id] = classDoc['name'] + ' ' + classDoc['surname'];
-    }
+    // Lista krotek (id, imię nazwisko)
+    List<MapEntry<String, String>> parentsList = usersSnapshot.docs.map((doc) {
+      return MapEntry(doc.id, '${doc['name']} ${doc['surname']}');
+    }).toList();
 
-    return parentsData;
+    // Sortowanie po nazwisku (czyli po ostatnim członie)
+    parentsList.sort(
+        (a, b) => a.value.split(' ').last.compareTo(b.value.split(' ').last));
+
+    // Konwersja z powrotem na mapę
+    return Map.fromEntries(parentsList);
   }
 
   Future<Map<String, dynamic>> getSchools() async {
@@ -130,16 +136,52 @@ class DatabaseMethods {
     return childrenData;
   }
 
-  // Future<QuerySnapshot<Map<String, dynamic>>> getStudentGrades(
-  //     String studentId) {
-  //   DocumentReference studentRef =
-  //       _firestore.collection('users').doc(studentId);
+  Future<void> addEmptyGradeForAllStudents(
+      String schoolId,
+      String classId,
+      String subjectId,
+      String year,
+      String description,
+      String subjectName) async {
+    QuerySnapshot studentsSnapshot = await _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'student')
+        .where('class_id',
+            isEqualTo: _firestore
+                .collection('schools')
+                .doc(schoolId)
+                .collection('classes')
+                .doc(classId))
+        .get();
 
-  //   return _firestore
-  //       .collection('grades')
-  //       .where('student_id', isEqualTo: studentRef)
-  //       .get();
-  // }
+    DocumentReference subjectRef = _firestore
+        .collection('schools')
+        .doc(schoolId)
+        .collection('classes')
+        .doc(classId)
+        .collection('subjects')
+        .doc(subjectId);
+
+    for (var studentDoc in studentsSnapshot.docs) {
+      DocumentReference studentRef = studentDoc.reference;
+      Map<String, dynamic> gradeData = {
+        'date': null,
+        'description': description,
+        'grade_value': null,
+        'is_final': false,
+        'school_year': year,
+        'student_id': studentRef,
+        'subject_id': subjectRef,
+        'subject_name': subjectName,
+        'weight': null,
+      };
+      try {
+        await _firestore.collection('grades').add(gradeData);
+      } catch (e) {
+        print("Błąd podczas dodawania pustej oceny: $e");
+      }
+    }
+  }
 
   Future<List<Map<String, dynamic>>> getStudentGrades(String studentId) async {
     DocumentReference studentRef =
@@ -148,6 +190,7 @@ class DatabaseMethods {
     final snapshot = await _firestore
         .collection('grades')
         .where('student_id', isEqualTo: studentRef)
+        .where('grade_value', isNull: false)
         .get();
 
     return snapshot.docs.map((doc) => doc.data()).toList();
@@ -155,7 +198,7 @@ class DatabaseMethods {
 
   Future<Map<String, Map<String, List<Map<String, String>>>>>
       getTeacherSubjects(String teacherId) async {
-    Map<String, Map<String, List<Map<String, String>>>> teacherData = {};
+    Map<String, Map<String, List<Map<String, String>>>> tempData = {};
     QuerySnapshot schoolsSnapshot =
         await _firestore.collection('schools').get();
 
@@ -180,15 +223,9 @@ class DatabaseMethods {
           String subjectName = subject['name'];
           String subjectId = subject.id;
 
-          if (!teacherData.containsKey(schoolName)) {
-            teacherData[schoolName] = {};
-          }
-
-          if (!teacherData[schoolName]!.containsKey(className)) {
-            teacherData[schoolName]![className] = [];
-          }
-
-          teacherData[schoolName]![className]!.add({
+          tempData.putIfAbsent(schoolName, () => {});
+          tempData[schoolName]!.putIfAbsent(className, () => []);
+          tempData[schoolName]![className]!.add({
             'id': subjectId,
             'name': subjectName,
             'schoolId': schoolId,
@@ -198,7 +235,25 @@ class DatabaseMethods {
       }
     }
 
-    return teacherData;
+    // Sortowanie klas i przedmiotów
+    Map<String, Map<String, List<Map<String, String>>>> sortedData = {};
+
+    for (var schoolEntry in tempData.entries) {
+      var sortedClasses = Map.fromEntries(
+        schoolEntry.value.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key)),
+      );
+
+      // Sortuj listy przedmiotów
+      sortedClasses.updateAll((className, subjects) {
+        subjects.sort((a, b) => a['name']!.compareTo(b['name']!));
+        return subjects;
+      });
+
+      sortedData[schoolEntry.key] = sortedClasses;
+    }
+
+    return sortedData;
   }
 
   Future<Map<String, dynamic>> getStudentSubjects(String studentId) async {
@@ -422,7 +477,6 @@ class DatabaseMethods {
 
     for (var subjectDoc in subjectsSnapshot.docs) {
       var subjectData = subjectDoc.data();
-      var subjectId = subjectDoc.id;
       var subjectName = subjectData['name'];
 
       // print("subjectName: $subjectName");
@@ -480,81 +534,6 @@ class DatabaseMethods {
 
     return attendanceData;
   }
-
-  // Future<Map<String, dynamic>> getStudentAttendance(String studentId) async {
-  //   print("Pobieranie frekwencji dla użytkownika: $studentId");
-
-  //   Map<String, dynamic> studentAttendance = {
-  //     'Spóźniony': {},
-  //     'Nieobecny': {},
-  //   };
-
-  //   try {
-  //     QuerySnapshot<Map<String, dynamic>> subjectsSnapshot =
-  //         await FirebaseFirestore.instance
-  //             .collection('schools')
-  //             .doc('school_id')
-  //             .collection('classes')
-  //             .doc('class_id')
-  //             .collection('subjects')
-  //             .get();
-
-  //     for (var subjectDoc in subjectsSnapshot.docs) {
-  //       var subjectData = subjectDoc.data();
-  //       var subjectName = subjectData['name'];
-
-  //       QuerySnapshot<Map<String, dynamic>> lessonsSnapshot = await subjectDoc
-  //           .reference
-  //           .collection('lessons')
-  //           .orderBy('date', descending: true)
-  //           .get();
-
-  //       for (var lessonDoc in lessonsSnapshot.docs) {
-  //         var lessonData = lessonDoc.data();
-  //         var lessonDate = lessonData['date'];
-  //         var lessonTime = lessonData['time'] ?? '00:00';
-
-  //         QuerySnapshot<Map<String, dynamic>> attendanceSnapshot =
-  //             await lessonDoc.reference
-  //                 .collection('attendance')
-  //                 .where('student_id', isEqualTo: studentId)
-  //                 .get();
-
-  //         if (attendanceSnapshot.docs.isNotEmpty) {
-  //           var attendanceEntry = attendanceSnapshot.docs.first.data();
-  //           var status = attendanceEntry['status'];
-  //           var justified = attendanceEntry['justified'] ?? false;
-
-  //           String dateKey = lessonDate.toString().split(' ')[0]; // YYYY-MM-DD
-
-  //           if (status == 'Spóźniony') {
-  //             studentAttendance['Spóźniony'].putIfAbsent(dateKey, () => {});
-  //             studentAttendance['Spóźniony'][dateKey]
-  //                 .putIfAbsent(subjectName, () => []);
-  //             studentAttendance['Spóźniony'][dateKey][subjectName].add({
-  //               'time': lessonTime,
-  //               'justified': justified,
-  //             });
-  //           } else if (status == 'Nieobecny') {
-  //             studentAttendance['Nieobecny'].putIfAbsent(dateKey, () => {});
-  //             studentAttendance['Nieobecny'][dateKey]
-  //                 .putIfAbsent(subjectName, () => []);
-  //             studentAttendance['Nieobecny'][dateKey][subjectName].add({
-  //               'time': lessonTime,
-  //               'justified': justified,
-  //             });
-  //           }
-  //         }
-  //       }
-  //     }
-
-  //     print("Frekwencja pobrana poprawnie: $studentAttendance");
-  //     return studentAttendance;
-  //   } catch (e) {
-  //     print("Błąd pobierania frekwencji: $e");
-  //     return {};
-  //   }
-  // }
 
   //update attendance
   Future<void> updateStudentAttendance(
@@ -679,12 +658,15 @@ class DatabaseMethods {
       // Pobierz dane ucznia
       var studentDoc = await studentRef.get();
       var studentData = studentDoc.data() as Map<String, dynamic>;
-      var studentName = studentData['name'] + ' ' + studentData['surname'];
+      var firstName = studentData['name'];
+      var lastName = studentData['surname'];
       var studentId = studentRef.id;
 
       if (!studentGradesMap.containsKey(studentId)) {
         studentGradesMap[studentId] = {
-          'name': studentName,
+          'first_name': firstName,
+          'last_name': lastName,
+          'name': '$firstName $lastName',
           'student_id': studentId,
           'grades': {},
         };
@@ -699,8 +681,10 @@ class DatabaseMethods {
       };
     }
 
-    // Przekształć mapę na listę
-    studentsGrades = studentGradesMap.values.toList();
+    // Przekształć mapę na listę i posortuj po nazwisku
+    studentsGrades = studentGradesMap.values.toList()
+      ..sort((a, b) =>
+          (a['last_name'] as String).compareTo(b['last_name'] as String));
 
     return studentsGrades;
   }
@@ -722,6 +706,7 @@ class DatabaseMethods {
               .collection('classes')
               .doc(classId),
         )
+        .orderBy('surname', descending: false)
         .get();
 
     final gradesSnapshot = await _firestore
@@ -818,18 +803,6 @@ class DatabaseMethods {
     }
   }
 
-  // Stream<QuerySnapshot> getAnnouncements(String schoolId) {
-  //   try {
-  //     return _firestore
-  //         .collection('announcements')
-  //         .where('school_id', isEqualTo: schoolId)
-  //         .orderBy('date', descending: true)
-  //         .snapshots();
-  //   } catch (e) {
-  //     throw Exception('Nie udało się pobrać ogłoszeń: $e');
-  //   }
-  // }
-
   Stream<List<Map<String, dynamic>>> getAnnouncements(String schoolId) {
     return _firestore
         .collection('announcements')
@@ -843,42 +816,6 @@ class DatabaseMethods {
             }).toList());
   }
 
-  // Stream<QuerySnapshot> getLatestAnnouncements(
-  //     String schoolId, int maxAnnouncements) {
-  //   return _firestore
-  //       .collection('announcements')
-  //       .where('school_id', isEqualTo: schoolId)
-  //       .orderBy('date', descending: true)
-  //       .limit(maxAnnouncements)
-  //       .snapshots();
-  // }
-
-  // Future<List<Map<String, dynamic>>> getLatestAnnouncements(
-  //     String schoolId, int maxAnnouncements) async {
-  //   final snapshot = await _firestore
-  //       .collection('announcements')
-  //       .where('school_id', isEqualTo: schoolId)
-  //       .orderBy('date', descending: true)
-  //       .limit(maxAnnouncements)
-  //       .get();
-
-  //   return snapshot.docs.map((doc) => doc.data()).toList();
-  // }
-
-  // Stream<List<Map<String, dynamic>>> getLatestAnnouncements(
-  //     String schoolId, int maxAnnouncements) {
-  //   return _firestore
-  //       .collection('announcements')
-  //       .where('school_id', isEqualTo: schoolId)
-  //       .orderBy('date', descending: true)
-  //       .limit(maxAnnouncements)
-  //       .snapshots()
-  //       .map((snapshot) => snapshot.docs.map((doc) {
-  //             var data = doc.data();
-  //             data['id'] = doc.id;
-  //             return data;
-  //           }).toList());
-  // }
   Stream<List<Map<String, dynamic>>> getLatestAnnouncements(
       String schoolId, int maxAnnouncements) {
     final Trace myTrace = performance.newTrace("load_announcements_widget");
@@ -1546,13 +1483,4 @@ class DatabaseMethods {
   Future<void> deleteSchool(String id) async {
     await _firestore.collection('schools').doc(id).delete();
   }
-
-  // Future updateEmployeeDetails(
-  //     String id, Map<String, dynamic> updateInfo) async {
-  //   return await _firestore.collection("Employee").doc(id).update(updateInfo);
-  // }
-
-  // Future deleteEmployee(String id) async {
-  //   return await _firestore.collection("Employee").doc(id).delete();
-  // }
 }
