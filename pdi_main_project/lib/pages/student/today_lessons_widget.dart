@@ -22,6 +22,7 @@ class _TodayLessonsWidgetState extends State<TodayLessonsWidget> {
   Map<String, dynamic> lessonTimes = {};
   List<Map<String, dynamic>> todayLessons = [];
   String? classId;
+  String? currentYear;
   bool isLoading = true;
 
   final daysOfWeek = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
@@ -30,6 +31,14 @@ class _TodayLessonsWidgetState extends State<TodayLessonsWidget> {
   void initState() {
     super.initState();
     loadTodayTimetable();
+    _loadCurrentYear();
+  }
+
+  void _loadCurrentYear() async {
+    final year = await widget.databaseMethods.getCurrentYear(widget.schoolId);
+    setState(() {
+      currentYear = year;
+    });
   }
 
   Future<void> loadTodayTimetable() async {
@@ -56,6 +65,7 @@ class _TodayLessonsWidgetState extends State<TodayLessonsWidget> {
           .collection('classes')
           .doc(classId)
           .collection('subjects')
+          .where('year', isEqualTo: currentYear)
           .get();
 
       final todayIndex = DateTime.now().weekday - 1;

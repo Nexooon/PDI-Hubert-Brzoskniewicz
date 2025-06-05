@@ -4,16 +4,34 @@ import 'package:pdi_main_project/service/database.dart';
 
 class GradesPage extends StatefulWidget {
   final String currentUserUid;
+  final String schoolId;
   final DatabaseMethods databaseMethods;
 
   const GradesPage(
-      {super.key, required this.currentUserUid, required this.databaseMethods});
+      {super.key,
+      required this.currentUserUid,
+      required this.schoolId,
+      required this.databaseMethods});
 
   @override
   State<GradesPage> createState() => _GradesPageState();
 }
 
 class _GradesPageState extends State<GradesPage> {
+  String? currentYear;
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentYear();
+  }
+
+  void _loadCurrentYear() async {
+    final year = await widget.databaseMethods.getCurrentYear(widget.schoolId);
+    setState(() {
+      currentYear = year;
+    });
+  }
+
   Future<List<Map<String, dynamic>>> _loadGrades() async {
     try {
       return await widget.databaseMethods
@@ -209,7 +227,8 @@ class _GradesPageState extends State<GradesPage> {
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      initiallyExpanded: year == schoolYears.keys.first,
+                      // initiallyExpanded: year == schoolYears.keys.first,
+                      initiallyExpanded: year == currentYear,
                       children: schoolYears[year]!.map((subjectData) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10.0),

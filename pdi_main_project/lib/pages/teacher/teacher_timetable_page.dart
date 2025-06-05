@@ -22,6 +22,7 @@ class _TeacherTimetablePageState extends State<TeacherTimetablePage> {
   Map<String, dynamic> lessonTimes = {};
   Map<String, Map<String, Map<String, dynamic>>> timetableMatrix =
       {}; // day -> lesson_number -> data
+  String? currentYear;
   bool isLoading = true;
 
   final daysOfWeek = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
@@ -30,6 +31,14 @@ class _TeacherTimetablePageState extends State<TeacherTimetablePage> {
   void initState() {
     super.initState();
     loadAllData();
+    _loadCurrentYear();
+  }
+
+  void _loadCurrentYear() async {
+    final year = await widget.databaseMethods.getCurrentYear(widget.schoolId);
+    setState(() {
+      currentYear = year;
+    });
   }
 
   Future<void> loadAllData() async {
@@ -69,6 +78,7 @@ class _TeacherTimetablePageState extends State<TeacherTimetablePage> {
             .collection('subjects')
             .where('employee',
                 isEqualTo: firestore.collection('users').doc(widget.teacherId))
+            .where('year', isEqualTo: currentYear)
             .get();
 
         for (final subjectDoc in subjectsSnapshot.docs) {

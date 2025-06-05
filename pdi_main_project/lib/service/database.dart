@@ -165,7 +165,7 @@ class DatabaseMethods {
     for (var studentDoc in studentsSnapshot.docs) {
       DocumentReference studentRef = studentDoc.reference;
       Map<String, dynamic> gradeData = {
-        'date': null,
+        'date': Timestamp.now().toDate(),
         'description': description,
         'grade_value': null,
         'is_final': false,
@@ -532,6 +532,15 @@ class DatabaseMethods {
       }
     }
 
+    for (var status in ['Spóźniony', 'Nieobecny']) {
+      var original = attendanceData[status] as Map;
+      var sortedEntries = original.entries.toList()
+        ..sort((a, b) => (a.key as Timestamp).compareTo(b.key as Timestamp));
+
+      attendanceData[status] =
+          Map.fromEntries(sortedEntries.reversed); // descending
+    }
+
     return attendanceData;
   }
 
@@ -645,6 +654,7 @@ class DatabaseMethods {
         .instance
         .collection('grades')
         .where('subject_id', isEqualTo: subjectRef)
+        .where('is_final', isEqualTo: false)
         .orderBy('date', descending: true)
         .get();
 
@@ -1404,6 +1414,7 @@ class DatabaseMethods {
           .collection('subjects')
           .where('employee',
               isEqualTo: firestore.collection('users').doc(teacherId))
+          .where('year', isEqualTo: await getCurrentYear(schoolId))
           .get();
 
       for (final subjectDoc in subjectsSnapshot.docs) {

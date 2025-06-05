@@ -22,6 +22,7 @@ class _StudentTimetablePageState extends State<TimetablePage> {
   Map<String, dynamic> lessonTimes = {};
   Map<String, List<Map<String, dynamic>>> timetableByDay = {};
   String? classId;
+  String? currentYear;
   bool isLoading = true;
 
   final daysOfWeek = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
@@ -40,6 +41,7 @@ class _StudentTimetablePageState extends State<TimetablePage> {
         throw Exception('Nie znaleziono klasy dla ucznia.');
       }
 
+      _loadCurrentYear();
       await loadTimetable();
     } catch (e) {
       print('Błąd podczas ładowania danych: $e');
@@ -48,6 +50,13 @@ class _StudentTimetablePageState extends State<TimetablePage> {
         isLoading = false;
       });
     }
+  }
+
+  void _loadCurrentYear() async {
+    final year = await widget.databaseMethods.getCurrentYear(widget.schoolId);
+    setState(() {
+      currentYear = year;
+    });
   }
 
   Future<void> loadTimetable() async {
@@ -71,6 +80,7 @@ class _StudentTimetablePageState extends State<TimetablePage> {
         .collection('classes')
         .doc(classId)
         .collection('subjects')
+        .where('year', isEqualTo: currentYear)
         .get();
 
     for (final subjectDoc in subjectsSnapshot.docs) {

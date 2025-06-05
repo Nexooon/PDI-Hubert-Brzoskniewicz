@@ -22,6 +22,7 @@ void main() {
     return MaterialApp(
       home: GradesPage(
         currentUserUid: 'testUserUid',
+        schoolId: 'testSchoolId',
         databaseMethods: mockDatabaseMethods,
       ),
     );

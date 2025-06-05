@@ -104,6 +104,7 @@ class _HomePageParentState extends State<HomePageParent> {
                                         MaterialPageRoute(
                                           builder: (context) => GradesPage(
                                             currentUserUid: childId,
+                                            schoolId: widget.schoolId,
                                             databaseMethods:
                                                 widget.databaseMethods,
                                           ),
